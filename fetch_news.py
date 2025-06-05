@@ -62,7 +62,7 @@ class TKRNewsClient:
             print(f"🔍 Discovering active endpoints...")
             
             # List endpoints via REST API
-            rest_url = "https://rest.runpod.io/v1/endpoints"
+            rest_url = "https://rest.runpod.ai/v1/endpoints"
             response = requests.get(rest_url, headers=self.headers, timeout=30)
             
             if response.status_code == 200:

@@ -1,18 +1,18 @@
 # TKR News Gather - RunPod Deployment Guide
-Generated: 2025-06-05 12:32:29
+Generated: 2025-06-05 15:17:42
 
 ## 🐳 Docker Image
 Your image has been pushed to: `tuckertucker/tkr-news-gather:latest`
 
 ## ✅ Template Created Successfully!
-- **Template ID**: `rxaw4dxqtm`
+- **Template ID**: `cg8czd73v7`
 - **Template Name**: `tkr-news-gather-template`
 
 Your template is ready! Use it to create a serverless endpoint in the RunPod dashboard.
 
 ## ✅ Endpoint Created Successfully!
-- **Endpoint ID**: `d0w22s1p9xfvnt`
-- **Endpoint URL**: `https://api.runpod.io/v2/d0w22s1p9xfvnt/runsync`
+- **Endpoint ID**: `rofq8x0hsb5zk2`
+- **Endpoint URL**: `https://api.runpod.ai/v2/rofq8x0hsb5zk2/runsync`
 
 Your endpoint is ready to use! Skip to the "Testing Your Deployment" section below.
 
@@ -60,13 +60,13 @@ LLM_MAX_TOKENS=200000
 
 ### Test Endpoints
 Your endpoint URL is:
-`https://api.runpod.io/v2/d0w22s1p9xfvnt/runsync`
+`https://api.runpod.ai/v2/rofq8x0hsb5zk2/runsync`
 
 ### Sample Test Requests
 
 **Get Provinces:**
 ```bash
-curl -X POST https://api.runpod.io/v2/d0w22s1p9xfvnt/runsync \
+curl -X POST https://api.runpod.ai/v2/rofq8x0hsb5zk2/runsync \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer rpa_173ARN..." \
   -d '{
@@ -78,7 +78,7 @@ curl -X POST https://api.runpod.io/v2/d0w22s1p9xfvnt/runsync \
 
 **Get News for Alberta:**
 ```bash
-curl -X POST https://api.runpod.io/v2/d0w22s1p9xfvnt/runsync \
+curl -X POST https://api.runpod.ai/v2/rofq8x0hsb5zk2/runsync \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer rpa_173ARN..." \
   -d '{
@@ -93,7 +93,7 @@ curl -X POST https://api.runpod.io/v2/d0w22s1p9xfvnt/runsync \
 
 **Process News with AI:**
 ```bash
-curl -X POST https://api.runpod.io/v2/d0w22s1p9xfvnt/runsync \
+curl -X POST https://api.runpod.ai/v2/rofq8x0hsb5zk2/runsync \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer rpa_173ARN..." \
   -d '{
@@ -110,12 +110,12 @@ curl -X POST https://api.runpod.io/v2/d0w22s1p9xfvnt/runsync \
 ## 📋 Manual RunPod Setup Steps
 
 ### Step 1: Template Already Created ✅
-Your template `rxaw4dxqtm` is ready to use.
+Your template `cg8czd73v7` is ready to use.
 
 ### Step 2: Create Serverless Endpoint
 1. **Navigate to Serverless**: Click "Serverless" in the top menu
 2. **Create New Endpoint**: Click "New Endpoint"
-3. **Select Template**: Choose your template `rxaw4dxqtm`
+3. **Select Template**: Choose your template `cg8czd73v7`
 4. **Configure Scaling**:
    - Max Workers: 5
    - Idle Timeout: 30 seconds

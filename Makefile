@@ -133,7 +133,7 @@ security-full: security-scan security-test code-audit deps-check
 
 # Docker targets
 docker-build:
-	docker build -t tkr-news-gather:latest .
+	docker build --platform linux/amd64 -t tkr-news-gather:latest .
 
 docker-build-hub:
 	@if [ -z "$(DOCKER_USERNAME)" ]; then \
@@ -141,7 +141,7 @@ docker-build-hub:
 		echo "   Load from .env: export DOCKER_USERNAME=\$$(grep DOCKER_USERNAME .env | cut -d= -f2)"; \
 		exit 1; \
 	fi
-	docker build -t $(DOCKER_USERNAME)/tkr-news-gather:latest .
+	docker build --platform linux/amd64 -t $(DOCKER_USERNAME)/tkr-news-gather:latest .
 
 docker-dev:
 	docker build -f Dockerfile.dev -t tkr-news-gather:dev .

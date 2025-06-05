@@ -34,3 +34,6 @@ passlib[bcrypt]>=1.7.4,<2.0.0  # Password hashing
 slowapi>=0.1.9,<1.0.0  # Rate limiting
 python-multipart>=0.0.6,<1.0.0  # Form data parsing
 
+# RunPod serverless
+runpod>=1.6.0,<2.0.0  # RunPod serverless SDK
+

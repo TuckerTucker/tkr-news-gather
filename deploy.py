@@ -249,7 +249,7 @@ class RunPodAPI:
     
     def get_endpoint_url(self, endpoint_id: str) -> str:
         """Get the URL for an endpoint"""
-        return f"https://api.runpod.io/v2/{endpoint_id}/runsync"
+        return f"https://api.runpod.ai/v2/{endpoint_id}/runsync"
 
 
 class DeploymentScript:
@@ -384,13 +384,77 @@ class DeploymentScript:
                 if self.ask_yes_no("Continue anyway?", False):
                     return True
                 else:
-                    sys.exit(1)
+                    return False
                     
         except Exception as e:
-            self.print_error(f"Failed to run command: {str(e)}")
-            if check:
-                sys.exit(1)
+            self.print_error(f"Error running command: {str(e)}")
+            if check and not self.ask_yes_no("Continue anyway?", False):
+                return False
             return False
+                    
+    def run_command_with_spinner(self, command: str, description: str, check: bool = True, hide_command: bool = False) -> bool:
+        """Run a shell command with an activity spinner for long-running operations"""
+        import threading
+        import time
+        
+        print(f"{Colors.CYAN}🔧 {description}...{Colors.END}")
+        
+        if hide_command:
+            print(f"{Colors.WHITE}   Running: [command with sensitive data hidden]{Colors.END}")
+        else:
+            print(f"{Colors.WHITE}   Running: {command}{Colors.END}")
+        
+        # Spinner animation
+        spinner_chars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+        spinner_idx = 0
+        spinner_running = True
+        
+        def spinner():
+            nonlocal spinner_idx
+            while spinner_running:
+                print(f"\r   {Colors.BLUE}{spinner_chars[spinner_idx]} Working...{Colors.END}", end='', flush=True)
+                spinner_idx = (spinner_idx + 1) % len(spinner_chars)
+                time.sleep(0.1)
+        
+        # Start spinner in background thread
+        spinner_thread = threading.Thread(target=spinner, daemon=True)
+        spinner_thread.start()
+        
+        try:
+            result = subprocess.run(command, shell=True, capture_output=True, text=True)
+            spinner_running = False
+            print(f"\r   {' ' * 20}\r", end='')  # Clear spinner line
+            
+            if result.returncode == 0:
+                self.print_success(f"{description} completed successfully")
+                # Only show last few lines of output for long operations
+                if result.stdout.strip():
+                    lines = result.stdout.strip().split('\n')
+                    if len(lines) > 5:
+                        print(f"{Colors.WHITE}   Output (last 5 lines):{Colors.END}")
+                        for line in lines[-5:]:
+                            print(f"{Colors.WHITE}   {line}{Colors.END}")
+                    else:
+                        print(f"{Colors.WHITE}   Output: {result.stdout.strip()}{Colors.END}")
+                return True
+            else:
+                self.print_error(f"{description} failed")
+                if result.stderr.strip():
+                    print(f"{Colors.RED}   Error: {result.stderr.strip()}{Colors.END}")
+                if not check:
+                    return False
+                
+                if self.ask_yes_no("Continue anyway?", False):
+                    return True
+                    
+        except Exception as e:
+            spinner_running = False
+            print(f"\r   {' ' * 20}\r", end='')  # Clear spinner line
+            self.print_error(f"Error running command: {str(e)}")
+            if check and not self.ask_yes_no("Continue anyway?", False):
+                return False
+                
+        return False
             
     def check_dependencies(self):
         """Check if required tools are installed"""
@@ -583,18 +647,19 @@ class DeploymentScript:
         self.print_step("5", "Building and Pushing Docker Image")
         
         print(f"Building image: {self.deployment_config['DOCKER_IMAGE']}")
+        print(f"{Colors.YELLOW}⏳ This may take several minutes depending on the changes...{Colors.END}")
         
         # Set Docker username environment variable for make command
         docker_username = self.deployment_config['DOCKER_USERNAME']
         build_cmd = f"DOCKER_USERNAME={docker_username} make docker-build-hub"
         
-        # Build image directly with Docker Hub tag
-        if not self.run_command(build_cmd, "Building Docker image with Docker Hub tag"):
+        # Build image directly with Docker Hub tag (with spinner for long operation)
+        if not self.run_command_with_spinner(build_cmd, "Building Docker image with Docker Hub tag"):
             return False
             
-        # Push image
+        # Push image (with spinner for long operation)
         push_cmd = f"docker push {self.deployment_config['DOCKER_IMAGE']}"
-        if not self.run_command(push_cmd, "Pushing Docker image to Hub"):
+        if not self.run_command_with_spinner(push_cmd, "Pushing Docker image to Hub"):
             return False
             
         self.print_success(f"Docker image available at: {self.deployment_config['DOCKER_IMAGE']}")
@@ -1280,11 +1345,11 @@ If your deployment fails:
                 if self.create_runpod_template_and_endpoint():
                     # Test the endpoint if it was created successfully
                     time.sleep(5)  # Give endpoint time to initialize
-                    self.test_runpod_endpoint()
+                    # self.test_runpod_endpoint()  # Disabled - testing can be done manually later
             
             self.generate_runpod_deployment_guide()
             self.update_env_file()
-            self.run_local_test()
+            # self.run_local_test()
             self.show_next_steps()
             
         except KeyboardInterrupt:

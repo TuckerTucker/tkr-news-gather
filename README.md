@@ -56,11 +56,12 @@ API_KEYS=your_api_key1,your_api_key2
 # Install dependencies
 pip install -r requirements.txt
 
-# Run locally
-python run_local.py
+# Start the local server
+uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 
-# Or start the API server
-python -m uvicorn src.main:app --reload
+# Or use the startup script
+chmod +x start_server.sh
+./start_server.sh
 ```
 
 #### Option B: Docker
@@ -73,29 +74,147 @@ docker build -t tkr-news-gather .
 docker run -p 8000:8000 --env-file .env tkr-news-gather
 ```
 
-### 4. API Usage
+## Usage
+
+### 🖥️ Local Server Usage
 
 The FastAPI server runs on `http://localhost:8000` with automatic documentation at `/docs`.
 
-#### Get News for a Province
+#### Basic News Fetching
 ```bash
+# Get 5 articles for Alberta
+curl "http://localhost:8000/news/Alberta?limit=5"
+
+# Get news with full content scraping
 curl "http://localhost:8000/news/Alberta?limit=5&scrape=true"
+
+# Save to local filesystem
+curl "http://localhost:8000/news/Alberta?limit=5&save_to_local=true"
+
+# Save to Supabase database
+curl "http://localhost:8000/news/Alberta?limit=5&save_to_db=true"
+
+# Combine options: scrape, save locally and to database
+curl "http://localhost:8000/news/Alberta?limit=10&scrape=true&save_to_local=true&save_to_db=true"
 ```
 
-#### Process News with AI Personality
+#### AI Processing
 ```bash
+# Fetch and process with anchor personality
 curl -X POST "http://localhost:8000/process/Alberta/anchor?limit=3"
+
+# Process with friend personality
+curl -X POST "http://localhost:8000/process/Alberta/friend?limit=3"
+
+# Process with newsreel personality
+curl -X POST "http://localhost:8000/process/Alberta/newsreel?limit=3"
 ```
 
-#### Get All Provinces
+#### Local Storage Management
 ```bash
+# List all locally saved sessions
+curl "http://localhost:8000/local/sessions"
+
+# Get sessions for specific province
+curl "http://localhost:8000/local/sessions?province=Alberta"
+
+# Get latest session for a province
+curl "http://localhost:8000/local/sessions/Alberta/latest"
+
+# Clean up old sessions (delete older than 30 days)
+curl -X DELETE "http://localhost:8000/local/sessions/old?days_to_keep=30"
+```
+
+#### Other Endpoints
+```bash
+# Get all available provinces
 curl "http://localhost:8000/provinces"
+
+# Health check
+curl "http://localhost:8000/health"
+
+# Run full pipeline (fetch + process with all personalities)
+curl -X POST "http://localhost:8000/pipeline/Alberta?limit=5"
+```
+
+### ☁️ Serverless Usage
+
+Use the serverless script to interact with your RunPod deployment:
+
+#### Setup Environment
+
+**Option 1: Use existing .env file (Recommended)**
+
+Your `.env` file should already contain the RunPod configuration from deployment:
+```bash
+RUNPOD_API_KEY=rpa_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ENDPOINT_URL=https://api.runpod.ai/v2/your-endpoint-id/runsync
+```
+
+**Option 2: Add/Update RunPod credentials manually**
+```bash
+# Add to your .env file
+echo "RUNPOD_API_KEY=your-runpod-api-key" >> .env
+echo "ENDPOINT_URL=https://api.runpod.ai/v2/your-endpoint-id/runsync" >> .env
+
+# Or export environment variables manually
+export RUNPOD_API_KEY="your-runpod-api-key"
+export ENDPOINT_URL="https://api.runpod.ai/v2/your-endpoint-id/runsync"
+```
+
+**Make script executable:**
+```bash
+chmod +x news_gather_serverless.sh
+```
+
+**Note:** The script automatically loads credentials from `.env` file if present, using `ENDPOINT_URL` and `RUNPOD_API_KEY` variables.
+
+#### Basic Usage
+```bash
+# Fetch news for Alberta and save locally
+./news_gather_serverless.sh --province "Alberta" --save-to-local
+
+# Fetch 5 articles for Ontario and save to database
+./news_gather_serverless.sh --province "Ontario" --save-to-db --limit 5
+
+# Fetch without content scraping
+./news_gather_serverless.sh --province "British Columbia" --no-scrape
+
+# Save response to file
+./news_gather_serverless.sh --province "Quebec" --output quebec_news.json
+```
+
+#### Advanced Options
+```bash
+# Verbose output with custom timeout
+./news_gather_serverless.sh --province "Manitoba" \
+    --save-to-local \
+    --limit 15 \
+    --verbose \
+    --timeout 600
+
+# Override endpoint and API key
+./news_gather_serverless.sh --province "Saskatchewan" \
+    --endpoint "https://custom-endpoint.com/runsync" \
+    --api-key "custom-api-key" \
+    --save-to-local
+
+# Get help
+./news_gather_serverless.sh --help
+```
+
+#### Testing
+```bash
+# Test the serverless script and local server
+chmod +x test_serverless.sh
+./test_serverless.sh
 ```
 
 ## API Endpoints
 
 ### News Collection
-- `GET /news/{province}` - Get news for a province
+- `GET /news/{province}` - Get news for a province with optional save parameters
+  - Query params: `limit`, `scrape`, `save_to_db`, `save_to_local`
 - `POST /news` - Get news (POST body)
 - `GET /provinces` - List all provinces
 
@@ -113,6 +232,11 @@ curl "http://localhost:8000/provinces"
 - `GET /sessions/{province}/latest` - Get latest session for province
 - `GET /sessions/{session_id}/articles` - Get articles for session
 - `GET /provinces/with-data` - Get provinces with data
+
+### Local Storage
+- `GET /local/sessions` - List all locally saved sessions
+- `GET /local/sessions/{province}/latest` - Get latest local session for province
+- `DELETE /local/sessions/old` - Delete old local sessions
 
 ## Project Structure
 
@@ -134,10 +258,13 @@ tkr-news-gather/
 ├── database/
 │   └── schema.sql                   # Supabase database schema
 ├── tests/                           # Test files
+├── news_data/                       # Local storage directory (created at runtime)
 ├── Dockerfile                       # Docker configuration
 ├── docker-compose.yml              # Docker Compose setup
 ├── runpod_handler.py               # RunPod serverless handler
-├── run_local.py                    # Local testing script
+├── start_server.sh                 # Local server startup script
+├── news_gather_serverless.sh       # Serverless client script
+├── test_serverless.sh              # Testing script
 └── requirements.txt                # Python dependencies
 ```
 
