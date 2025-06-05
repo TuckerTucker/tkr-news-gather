@@ -143,7 +143,28 @@ tkr-news-gather/
 
 ## RunPod Deployment
 
-For serverless deployment on RunPod:
+### 🚀 Automated Deployment (Recommended)
+
+Use the interactive deployment script for complete automated setup:
+
+```bash
+# Run the interactive deployment wizard
+make deploy-runpod
+
+# Or run directly
+python3 deploy.py
+```
+
+The script will:
+- ✅ Build and push Docker image automatically
+- ✅ Generate all security credentials (JWT, API keys)
+- ✅ Create RunPod template and endpoint via API
+- ✅ Test the deployed endpoint
+- ✅ Generate complete documentation
+
+### 📋 Manual Deployment
+
+For manual deployment on RunPod:
 
 1. **Build Docker Image**:
 ```bash

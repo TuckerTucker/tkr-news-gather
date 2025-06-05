@@ -1,8 +1,8 @@
 # Core dependencies with security patches
 # Updated: 2025-01-04 - Security vulnerability fixes
 
-# Google News API
-pygooglenews==0.1.2
+# Google News RSS parsing (used by improved client)
+feedparser>=6.0.10,<7.0.0  # Modern version compatible with Python 3.9+
 
 # Web scraping and parsing
 crawl4ai>=0.3.0,<1.0.0  # Updated for compatibility
@@ -15,6 +15,7 @@ anthropic>=0.25.0,<1.0.0  # Latest stable API
 # HTTP and async
 aiohttp>=3.9.2,<4.0.0  # CRITICAL: Fixed CVE-2024-23334 (HTTP header injection)
 httpx>=0.26.0,<1.0.0  # Updated for compatibility
+requests>=2.31.0,<3.0.0  # For deployment script RunPod API calls
 
 # Web framework
 fastapi>=0.108.0,<1.0.0  # Latest stable with security fixes

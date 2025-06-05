@@ -1,6 +1,7 @@
-from pygooglenews import GoogleNews
+from .google_news_client_improved import ImprovedGoogleNewsClient
 from typing import List, Dict, Optional
 import hashlib
+import asyncio
 from datetime import datetime
 from .google_news_decoder import decode_google_news_url
 from .provinces import get_province_info
@@ -10,9 +11,19 @@ logger = get_logger(__name__)
 
 class GoogleNewsClient:
     def __init__(self):
-        self.gn = GoogleNews(lang='en', country='CA')
+        self.client = None
     
+    async def _get_client(self):
+        """Get or create the improved client"""
+        if self.client is None:
+            self.client = ImprovedGoogleNewsClient()
+        return self.client
+
     def get_news_by_province(self, province: str, limit: int = 10) -> List[Dict]:
+        """Fetch news for a specific Canadian province (sync wrapper)"""
+        return asyncio.run(self.get_news_by_province_async(province, limit))
+
+    async def get_news_by_province_async(self, province: str, limit: int = 10) -> List[Dict]:
         """Fetch news for a specific Canadian province"""
         province_info = get_province_info(province)
         if not province_info:
@@ -21,40 +32,39 @@ class GoogleNewsClient:
         all_results = []
         seen_urls = set()
         
+        client = await self._get_client()
+        
         # Search using different terms to get diverse results
         for search_term in province_info['search_terms']:
             try:
                 logger.info(f"Searching for: {search_term}")
-                search_results = self.gn.search(search_term, when='1d')
+                articles = await client.search(search_term, country='CA', language='en')
                 
-                if 'entries' in search_results:
-                    for entry in search_results['entries']:
-                        decoded_url = decode_google_news_url(entry.get('link', ''))
+                for article in articles:
+                    # Skip if we've seen this URL
+                    if article.link in seen_urls:
+                        continue
+                    
+                    seen_urls.add(article.link)
+                    
+                    article_dict = {
+                        'article_id': article.guid or '',
+                        'wtkr_id': self.generate_wtkr_id({'link': article.link, 'title': article.title}),
+                        'title': article.title,
+                        'link': article.link,
+                        'original_link': article.link,  # Improved client already decodes URLs
+                        'source_name': article.source,
+                        'pub_date': article.published.isoformat(),
+                        'summary': article.summary,
+                        'language': 'en',
+                        'country': 'ca'
+                    }
+                    
+                    all_results.append(article_dict)
+                    
+                    if len(all_results) >= limit:
+                        return all_results[:limit]
                         
-                        # Skip if we've seen this URL
-                        if decoded_url in seen_urls:
-                            continue
-                        
-                        seen_urls.add(decoded_url)
-                        
-                        article = {
-                            'article_id': entry.get('id', ''),
-                            'wtkr_id': self.generate_wtkr_id(entry),
-                            'title': entry.get('title', ''),
-                            'link': decoded_url,
-                            'original_link': entry.get('link', ''),
-                            'source_name': entry.get('source', {}).get('title', ''),
-                            'pub_date': entry.get('published', ''),
-                            'summary': entry.get('summary', ''),
-                            'language': 'en',
-                            'country': 'ca'
-                        }
-                        
-                        all_results.append(article)
-                        
-                        if len(all_results) >= limit:
-                            return all_results[:limit]
-                            
             except Exception as e:
                 logger.error(f"Error searching for {search_term}: {str(e)}")
                 continue

@@ -27,10 +27,16 @@ help:
 	@echo "  code-audit     - Run static code security analysis"
 	@echo ""
 	@echo "Docker Commands:"
-	@echo "  docker-build   - Build production Docker image"
+	@echo "  docker-build   - Build production Docker image (local tag)"
+	@echo "  docker-build-hub - Build with Docker Hub username tag"
 	@echo "  docker-dev     - Build development Docker image"
 	@echo "  docker-run     - Run application in Docker"
 	@echo "  docker-compose - Run with docker-compose"
+	@echo ""
+	@echo "Deployment Commands:"
+	@echo "  deploy-runpod  - Interactive RunPod deployment guide"
+	@echo "  deploy-quick   - Quick deployment using existing .env config"
+	@echo "  deploy-interactive - Alias for deploy-runpod"
 	@echo ""
 	@echo "Cleanup Commands:"
 	@echo "  clean          - Clean up temporary files"
@@ -129,6 +135,14 @@ security-full: security-scan security-test code-audit deps-check
 docker-build:
 	docker build -t tkr-news-gather:latest .
 
+docker-build-hub:
+	@if [ -z "$(DOCKER_USERNAME)" ]; then \
+		echo "❌ DOCKER_USERNAME environment variable not set"; \
+		echo "   Load from .env: export DOCKER_USERNAME=\$$(grep DOCKER_USERNAME .env | cut -d= -f2)"; \
+		exit 1; \
+	fi
+	docker build -t $(DOCKER_USERNAME)/tkr-news-gather:latest .
+
 docker-dev:
 	docker build -f Dockerfile.dev -t tkr-news-gather:dev .
 
@@ -170,3 +184,14 @@ prod-check: quality-gate
 	python -c "from src.utils import Config; c = Config(); assert c.ANTHROPIC_API_KEY, 'Missing ANTHROPIC_API_KEY'"
 	docker build --target production -t tkr-news-gather:prod-test .
 	@echo "✅ Production readiness check passed!"
+
+# RunPod deployment
+deploy-runpod:
+	@echo "🚀 Starting interactive RunPod deployment..."
+	python3 deploy.py
+
+deploy-quick:
+	@echo "🚀 Starting quick RunPod deployment with existing config..."
+	python3 deploy.py --quick
+
+deploy-interactive: deploy-runpod
