@@ -39,7 +39,9 @@
       "Bash(mkdir:*)",
       "Bash(rg:*)",
       "Bash(grep:*)",
-      "find"
+      "Bash(find:*)",
+      "Bash(search:*)",
+      "Search(pattern:*)"
     ],
     "deny": [
       "Bash(rm -rf /)",
