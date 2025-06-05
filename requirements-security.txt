@@ -1,0 +1,19 @@
+# Security scanning and analysis tools
+# Updated: 2025-01-04
+
+# Vulnerability scanning
+safety>=3.0.0,<4.0.0  # Check dependencies for known vulnerabilities
+bandit>=1.7.5,<2.0.0  # Security issues in Python code
+
+# SAST (Static Application Security Testing)
+semgrep>=1.55.0,<2.0.0  # Advanced static analysis
+
+# Dependency analysis
+pip-audit>=2.6.0,<3.0.0  # Official PyPA security scanner
+cyclonedx-bom>=4.0.0,<5.0.0  # Software Bill of Materials
+
+# License compliance
+pip-licenses>=4.3.0,<5.0.0  # License scanning
+
+# Container security (for development)
+docker-py>=7.0.0,<8.0.0  # Docker API for security scanning integration

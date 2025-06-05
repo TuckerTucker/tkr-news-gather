@@ -1,0 +1,53 @@
+# Development Dockerfile with security and quality tools
+FROM python:3.9-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies with security updates
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    make \
+    libffi-dev \
+    libssl-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    git \
+    curl \
+    && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Copy requirements files
+COPY requirements.txt requirements-dev.txt requirements-security.txt ./
+
+# Upgrade pip and install all dependencies (dev + security)
+RUN python -m pip install --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir -r requirements-dev.txt && \
+    pip install --no-cache-dir -r requirements-security.txt
+
+# Install pre-commit hooks
+COPY .pre-commit-config.yaml .
+RUN pre-commit install
+
+# Copy source code
+COPY src/ ./src/
+COPY database/ ./database/
+COPY tests/ ./tests/
+COPY run_local.py runpod_handler.py ./
+
+# Create a non-root user for security
+RUN useradd -m -u 1000 developer && chown -R developer:developer /app
+USER developer
+
+# Expose port
+EXPOSE 8000
+
+# Health check with security scanning
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/health')" || exit 1
+
+# Default command for development
+CMD ["python", "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

@@ -1,0 +1,34 @@
+# Core dependencies with security patches
+# Updated: 2025-01-04 - Security vulnerability fixes
+
+# Google News API
+pygooglenews==0.1.2
+
+# Web scraping and parsing
+crawl4ai>=0.3.0,<1.0.0  # Updated for compatibility
+beautifulsoup4>=4.12.3,<5.0.0  # Security patches
+lxml>=5.1.0,<6.0.0  # CRITICAL: Fixed CVE-2022-2309, CVE-2021-43818
+
+# AI/LLM
+anthropic>=0.25.0,<1.0.0  # Latest stable API
+
+# HTTP and async
+aiohttp>=3.9.2,<4.0.0  # CRITICAL: Fixed CVE-2024-23334 (HTTP header injection)
+httpx>=0.26.0,<1.0.0  # Updated for compatibility
+
+# Web framework
+fastapi>=0.108.0,<1.0.0  # Latest stable with security fixes
+uvicorn[standard]>=0.25.0,<1.0.0  # Updated server
+pydantic>=2.6.0,<3.0.0  # Enhanced validation
+
+# Database
+supabase>=2.3.0,<3.0.0  # Updated client
+
+# Configuration
+python-dotenv>=1.0.0,<2.0.0
+
+# Security
+python-jose[cryptography]>=3.3.0,<4.0.0  # JWT token handling
+passlib[bcrypt]>=1.7.4,<2.0.0  # Password hashing
+slowapi>=0.1.9,<1.0.0  # Rate limiting
+python-multipart>=0.0.6,<1.0.0  # Form data parsing

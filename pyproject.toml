@@ -1,0 +1,206 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "tkr-news-gather"
+version = "0.1.0"
+description = "A Python-based news collection and AI processing system for Canadian provincial news"
+authors = ["TKR News Team <contact@tkr-news.com>"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/tkr-projects/tkr-news-gather"
+repository = "https://github.com/tkr-projects/tkr-news-gather"
+documentation = "https://github.com/tkr-projects/tkr-news-gather/blob/main/README.md"
+keywords = ["news", "ai", "canada", "scraping", "nlp"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Linguistic",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: News/Diary",
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+# News data sources
+feedparser = "^6.0.11"  # Updated from 5.2.1 - critical security fixes
+pygooglenews = "0.1.2"  # Marked for replacement - unmaintained
+
+# Web scraping and parsing
+crawl4ai = "^0.3.7"
+beautifulsoup4 = "^4.12.3"
+lxml = "^5.1.0"  # CVE fixes included
+
+# AI and LLM
+anthropic = "^0.34.0"  # Updated to latest
+
+# HTTP client (consolidated)
+httpx = "^0.26.0"  # Primary HTTP client, replaces aiohttp
+
+# Web framework
+fastapi = "^0.109.0"
+uvicorn = {extras = ["standard"], version = "^0.25.0"}
+pydantic = "^2.6.0"
+
+# Database and authentication
+supabase = "^2.4.0"
+
+# Security and authentication
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+slowapi = "^0.1.9"
+python-multipart = "^0.0.6"
+
+# Configuration
+python-dotenv = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+# Testing
+pytest = "^7.4.0"
+pytest-asyncio = "^0.21.0"
+pytest-cov = "^4.1.0"
+httpx = "^0.26.0"  # For testing async clients
+
+# Code quality
+black = "^23.12.0"
+isort = "^5.13.0"
+flake8 = "^6.1.0"
+mypy = "^1.8.0"
+pre-commit = "^3.6.0"
+
+# Security scanning
+bandit = "^1.7.5"
+safety = "^2.3.5"
+pip-audit = "^2.6.1"
+
+# Documentation
+mkdocs = "^1.5.3"
+mkdocs-material = "^9.5.0"
+
+[tool.poetry.group.security]
+optional = true
+
+[tool.poetry.group.security.dependencies]
+# Additional security tools
+semgrep = "^1.45.0"
+cyclonedx-bom = "^4.3.0"  # SBOM generation
+licensecheck = "^2024.1"
+
+[tool.poetry.group.docker]
+optional = true
+
+[tool.poetry.group.docker.dependencies]
+# Minimal dependencies for Docker containers
+gunicorn = "^21.2.0"
+
+[tool.poetry.scripts]
+tkr-news = "src.main:main"
+tkr-news-secure = "src.main_secure:main"
+
+# ==================================================
+# TOOL CONFIGURATIONS
+# ==================================================
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.mypy_cache
+  | \.pytest_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["src"]
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+exclude = [
+    ".git",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    "build",
+    "dist",
+    ".venv"
+]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+exclude = [
+    "tests/",
+    "build/",
+    "dist/"
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "--strict-markers --strict-config --cov=src --cov-report=term-missing --cov-report=html"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_functions = ["test_*"]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/.*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.bandit]
+exclude_dirs = ["tests", "build", "dist"]
+skips = ["B101", "B601"]  # Skip assert and shell usage warnings in tests
+
+[tool.licensecheck]
+using = "PEP631"

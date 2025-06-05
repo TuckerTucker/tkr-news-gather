@@ -1,0 +1,87 @@
+# Dependabot configuration for automated dependency updates
+# Updated: 2025-01-06 - Enhanced for Poetry and security updates
+
+version: 2
+updates:
+  # Python dependencies with Poetry
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "tkr-admin"
+    assignees:
+      - "tkr-admin"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "security"
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    ignore:
+      # Ignore major version updates for stable packages
+      - dependency-name: "fastapi"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "pydantic"
+        update-types: ["version-update:semver-major"]
+      # Ignore pygooglenews until we replace it
+      - dependency-name: "pygooglenews"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+    groups:
+      security-updates:
+        patterns:
+          - "lxml"
+          - "aiohttp"
+          - "httpx"
+          - "fastapi"
+          - "uvicorn"
+          - "feedparser"
+        update-types:
+          - "security-update"
+      testing-dependencies:
+        patterns:
+          - "pytest*"
+          - "*testing*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "ci/cd"
+      - "dependencies"
+
+  # Docker dependencies
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+    labels:
+      - "docker"
+      - "dependencies"

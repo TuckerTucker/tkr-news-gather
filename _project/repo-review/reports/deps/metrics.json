@@ -1,0 +1,127 @@
+{
+  "metadata": {
+    "repository": "tkr-news-gather",
+    "analysis_date": "2025-01-06",
+    "analyzer": "Dependencies Analysis Agent"
+  },
+  "summary_metrics": {
+    "total_dependencies": 74,
+    "production_dependencies": 34,
+    "development_dependencies": 33,
+    "security_dependencies": 7,
+    "unique_packages": 67,
+    "direct_dependencies": 34,
+    "estimated_transitive_dependencies": 150,
+    "total_size_mb": 250
+  },
+  "health_metrics": {
+    "dependencies_up_to_date": 22,
+    "dependencies_outdated": 12,
+    "dependencies_unmaintained": 2,
+    "dependencies_with_cves": 0,
+    "dependencies_with_fixed_cves": 3,
+    "average_age_days": 180,
+    "oldest_dependency_age_days": 1460
+  },
+  "risk_metrics": {
+    "high_risk_count": 2,
+    "medium_risk_count": 5,
+    "low_risk_count": 27,
+    "critical_vulnerabilities": 0,
+    "high_vulnerabilities": 0,
+    "medium_vulnerabilities": 2,
+    "low_vulnerabilities": 1
+  },
+  "version_management": {
+    "pinned_versions": 8,
+    "range_versions": 26,
+    "unpinned_versions": 0,
+    "version_conflicts": 3,
+    "files_with_dependencies": 4
+  },
+  "license_metrics": {
+    "unique_licenses": 5,
+    "permissive_licenses": 33,
+    "copyleft_licenses": 0,
+    "unknown_licenses": 1,
+    "commercial_compatible": 34,
+    "attribution_required": 3
+  },
+  "maintenance_metrics": {
+    "actively_maintained": 28,
+    "maintenance_mode": 4,
+    "unmaintained": 2,
+    "average_release_frequency_days": 30,
+    "dependencies_updated_last_month": 18,
+    "dependencies_updated_last_year": 30
+  },
+  "security_compliance": {
+    "has_security_scanning": true,
+    "has_vulnerability_monitoring": false,
+    "has_sbom_generation": false,
+    "has_license_scanning": true,
+    "has_dependency_pinning": false,
+    "has_hash_verification": false,
+    "compliance_score": 0.33
+  },
+  "technical_debt": {
+    "outdated_major_versions": 5,
+    "security_patches_behind": 2,
+    "redundant_dependencies": 2,
+    "unused_dependencies_estimate": 3,
+    "migration_effort_hours": 40
+  },
+  "dependency_categories": {
+    "web_framework": 4,
+    "http_clients": 3,
+    "web_scraping": 4,
+    "ai_ml": 1,
+    "database": 1,
+    "security": 4,
+    "testing": 10,
+    "development_tools": 7
+  },
+  "update_priorities": {
+    "critical": [
+      {
+        "package": "feedparser",
+        "current": "5.2.1",
+        "target": "6.0.11",
+        "reason": "4+ years outdated, security patches"
+      }
+    ],
+    "high": [
+      {
+        "package": "pygooglenews",
+        "current": "0.1.2",
+        "action": "replace",
+        "reason": "unmaintained since 2021"
+      }
+    ],
+    "medium": [
+      {
+        "package": "beautifulsoup4",
+        "action": "consolidate_versions",
+        "reason": "version mismatch across files"
+      },
+      {
+        "package": "aiohttp/httpx",
+        "action": "remove_redundancy",
+        "reason": "duplicate functionality"
+      }
+    ]
+  },
+  "cost_analysis": {
+    "estimated_disk_usage_mb": 250,
+    "estimated_memory_usage_mb": 150,
+    "build_time_seconds": 120,
+    "install_time_seconds": 90,
+    "ci_minutes_per_month": 500
+  },
+  "trends": {
+    "dependencies_added_last_month": 2,
+    "dependencies_removed_last_month": 0,
+    "security_fixes_last_month": 3,
+    "average_update_lag_days": 30
+  }
+}

@@ -1,0 +1,100 @@
+# TKR News Gatherer - Updated Dependencies
+# Consolidated requirements addressing security and maintenance issues
+# Updated: 2025-01-06 - Fixed critical dependency issues
+
+# ==================================================
+# NEWS DATA SOURCES
+# ==================================================
+
+# Google News parsing - ISSUE: pygooglenews is unmaintained since 2021
+# Temporarily keeping for compatibility, but marked for replacement
+pygooglenews==0.1.2  # TODO: Replace with maintained alternative
+
+# RSS/Atom feed parsing - CRITICAL UPDATE
+feedparser>=6.0.11,<7.0.0  # Updated from 5.2.1 (4+ years outdated)
+
+# ==================================================
+# WEB SCRAPING & PARSING
+# ==================================================
+
+# Advanced web scraping with AI capabilities
+crawl4ai>=0.3.7,<1.0.0  # Updated to latest stable
+
+# HTML/XML parsing
+beautifulsoup4>=4.12.3,<5.0.0  # Consistent version, security patches
+lxml>=5.1.0,<6.0.0  # CVE fixes: CVE-2022-2309, CVE-2021-43818
+
+# ==================================================
+# HTTP CLIENT - CONSOLIDATION
+# ==================================================
+
+# Using httpx as primary HTTP client (removing aiohttp redundancy)
+# httpx provides both sync/async APIs and is more modern
+httpx>=0.26.0,<1.0.0  # Primary HTTP client
+# aiohttp - REMOVED (redundant with httpx)
+
+# ==================================================
+# AI & LLM INTEGRATION
+# ==================================================
+
+# Anthropic Claude API - Updated to latest
+anthropic>=0.34.0,<1.0.0  # Updated from 0.25.0 to latest stable
+
+# ==================================================
+# WEB FRAMEWORK & API
+# ==================================================
+
+# FastAPI ecosystem - Updated to latest stable versions
+fastapi>=0.109.0,<1.0.0  # Updated from 0.108.0
+uvicorn[standard]>=0.25.0,<1.0.0  # Updated server
+pydantic>=2.6.0,<3.0.0  # Enhanced validation and security
+
+# ==================================================
+# DATABASE & AUTHENTICATION
+# ==================================================
+
+# Supabase client - Updated to latest
+supabase>=2.4.0,<3.0.0  # Updated from 2.3.0
+
+# ==================================================
+# SECURITY & AUTH
+# ==================================================
+
+# JWT token handling
+python-jose[cryptography]>=3.3.0,<4.0.0
+
+# Password hashing
+passlib[bcrypt]>=1.7.4,<2.0.0
+
+# Rate limiting
+slowapi>=0.1.9,<1.0.0
+
+# Form data handling
+python-multipart>=0.0.6,<1.0.0
+
+# ==================================================
+# CONFIGURATION & UTILITIES
+# ==================================================
+
+# Environment configuration
+python-dotenv>=1.0.0,<2.0.0
+
+# ==================================================
+# DEPENDENCY NOTES
+# ==================================================
+
+# Security improvements made:
+# - Updated feedparser from 5.2.1 to 6.0.11+ (4+ years of security patches)
+# - Removed aiohttp/httpx redundancy (chose httpx for better API)
+# - Updated all packages to latest stable versions
+# - Fixed version conflicts between requirements files
+#
+# TODO - Replace pygooglenews:
+# - Package unmaintained since 2021
+# - Consider: gnews, news-please, or custom Google News scraper
+# - Priority: High (operational risk)
+#
+# Removed packages:
+# - aiohttp (redundant with httpx)
+# - requests (redundant with httpx)
+# - runpod (not needed in core requirements)

@@ -1,0 +1,213 @@
+{
+  "metadata": {
+    "repository": "tkr-news-gather",
+    "analysis_date": "2025-01-06",
+    "analyzer": "Dependencies Analysis Agent",
+    "total_dependencies": {
+      "production": 34,
+      "development": 33,
+      "security": 7
+    }
+  },
+  "dependencies": {
+    "production": [
+      {
+        "name": "pygooglenews",
+        "version": "0.1.2",
+        "latest_version": "0.1.2",
+        "last_updated": "2021-03-15",
+        "license": "MIT",
+        "risk_level": "high",
+        "issues": ["unmaintained", "no_recent_updates"],
+        "alternatives": ["custom_implementation", "googlenews-api"]
+      },
+      {
+        "name": "crawl4ai",
+        "version": ">=0.3.0,<1.0.0",
+        "latest_version": "0.3.7",
+        "license": "Apache-2.0",
+        "risk_level": "low",
+        "issues": [],
+        "health": "active"
+      },
+      {
+        "name": "beautifulsoup4",
+        "version": ">=4.12.3,<5.0.0",
+        "latest_version": "4.12.3",
+        "license": "MIT",
+        "risk_level": "low",
+        "issues": ["version_mismatch_docker"],
+        "health": "active"
+      },
+      {
+        "name": "lxml",
+        "version": ">=5.1.0,<6.0.0",
+        "latest_version": "5.1.0",
+        "license": "BSD",
+        "risk_level": "medium",
+        "issues": ["requires_attribution"],
+        "cves_fixed": ["CVE-2022-2309", "CVE-2021-43818"],
+        "health": "active"
+      },
+      {
+        "name": "anthropic",
+        "version": ">=0.25.0,<1.0.0",
+        "latest_version": "0.34.0",
+        "license": "MIT",
+        "risk_level": "low",
+        "issues": [],
+        "health": "very_active"
+      },
+      {
+        "name": "aiohttp",
+        "version": ">=3.9.2,<4.0.0",
+        "latest_version": "3.9.3",
+        "license": "Apache-2.0",
+        "risk_level": "low",
+        "issues": ["redundant_with_httpx"],
+        "cves_fixed": ["CVE-2024-23334"],
+        "health": "active"
+      },
+      {
+        "name": "httpx",
+        "version": ">=0.26.0,<1.0.0",
+        "latest_version": "0.26.0",
+        "license": "BSD-3-Clause",
+        "risk_level": "low",
+        "issues": ["redundant_with_aiohttp"],
+        "health": "active"
+      },
+      {
+        "name": "fastapi",
+        "version": ">=0.108.0,<1.0.0",
+        "latest_version": "0.109.0",
+        "license": "MIT",
+        "risk_level": "low",
+        "issues": [],
+        "health": "very_active"
+      },
+      {
+        "name": "supabase",
+        "version": ">=2.3.0,<3.0.0",
+        "latest_version": "2.4.0",
+        "license": "MIT",
+        "risk_level": "low",
+        "issues": [],
+        "health": "active"
+      },
+      {
+        "name": "feedparser",
+        "version": "5.2.1",
+        "latest_version": "6.0.11",
+        "license": "BSD",
+        "risk_level": "high",
+        "issues": ["severely_outdated", "security_patches_missing"],
+        "health": "maintenance_mode"
+      }
+    ],
+    "version_conflicts": [
+      {
+        "package": "beautifulsoup4",
+        "files": {
+          "requirements.txt": ">=4.12.3,<5.0.0",
+          "requirements-docker.txt": "==4.12.2"
+        }
+      },
+      {
+        "package": "lxml",
+        "files": {
+          "requirements.txt": ">=5.1.0,<6.0.0",
+          "requirements-docker.txt": "==4.9.3"
+        }
+      },
+      {
+        "package": "aiohttp",
+        "files": {
+          "requirements.txt": ">=3.9.2,<4.0.0",
+          "requirements-docker.txt": "==3.9.1"
+        }
+      }
+    ]
+  },
+  "security_issues": [
+    {
+      "severity": "high",
+      "type": "unmaintained_dependency",
+      "package": "pygooglenews",
+      "description": "Package has not been updated since 2021",
+      "recommendation": "Replace with maintained alternative or custom implementation"
+    },
+    {
+      "severity": "high",
+      "type": "outdated_dependency",
+      "package": "feedparser",
+      "description": "Using version 5.2.1 from 2013, current is 6.0.11",
+      "recommendation": "Update to latest version for security patches"
+    },
+    {
+      "severity": "medium",
+      "type": "version_inconsistency",
+      "description": "Multiple requirements files with conflicting versions",
+      "recommendation": "Consolidate into single source of truth with lockfile"
+    },
+    {
+      "severity": "medium",
+      "type": "missing_integrity_checks",
+      "description": "No hash verification for downloaded packages",
+      "recommendation": "Implement pip-tools or Poetry for hash verification"
+    }
+  ],
+  "license_analysis": {
+    "summary": {
+      "MIT": 25,
+      "Apache-2.0": 5,
+      "BSD": 3,
+      "BSD-3-Clause": 3,
+      "Unknown": 1
+    },
+    "attribution_required": [
+      "lxml (BSD)",
+      "passlib (BSD)",
+      "feedparser (BSD)"
+    ],
+    "commercial_compatible": true,
+    "copyleft_licenses": []
+  },
+  "optimization_opportunities": [
+    {
+      "type": "redundant_dependencies",
+      "packages": ["aiohttp", "httpx"],
+      "impact": "~50MB disk space, potential conflicts",
+      "recommendation": "Choose one HTTP client library"
+    },
+    {
+      "type": "outdated_tooling",
+      "description": "Using requirements.txt instead of modern dependency management",
+      "impact": "No lockfile, unpredictable builds",
+      "recommendation": "Migrate to Poetry or pip-tools"
+    },
+    {
+      "type": "missing_automation",
+      "description": "No automated dependency updates",
+      "impact": "Manual effort, delayed security patches",
+      "recommendation": "Implement Dependabot or Renovate"
+    }
+  ],
+  "recommendations": {
+    "immediate": [
+      "Update feedparser to 6.0.11",
+      "Consolidate requirements files",
+      "Remove either aiohttp or httpx"
+    ],
+    "short_term": [
+      "Implement dependency pinning with hashes",
+      "Replace pygooglenews with maintained alternative",
+      "Add automated security scanning to CI/CD"
+    ],
+    "long_term": [
+      "Migrate to Poetry for dependency management",
+      "Implement SBOM generation",
+      "Create dependency approval process"
+    ]
+  }
+}

@@ -1,0 +1,463 @@
+{
+  "analysis_metadata": {
+    "repository": "/Volumes/tkr-riffic/@tkr-projects/tkr-news-gather",
+    "analysis_date": "2025-06-05T14:37:18Z",
+    "agent": "security-analysis-agent",
+    "version": "1.0.0",
+    "framework": "OWASP Top 10 2021"
+  },
+  "summary": {
+    "total_findings": 18,
+    "critical": 2,
+    "high": 4,
+    "medium": 7,
+    "low": 5,
+    "risk_score": 72,
+    "compliance_score": 78
+  },
+  "findings": [
+    {
+      "id": "CRITICAL-001",
+      "severity": "CRITICAL",
+      "category": "Authentication",
+      "title": "Hardcoded Credentials in Authentication Endpoint",
+      "description": "The authentication endpoint contains hardcoded credentials (username='admin', password='secure_password') which allows anyone with source code access to authenticate.",
+      "location": {
+        "file": "src/main_secure.py",
+        "lines": "141-145",
+        "function": "login_for_access_token"
+      },
+      "owasp_category": "A07:2021 - Identification and Authentication Failures",
+      "cwe": "CWE-798",
+      "cvss_score": 9.8,
+      "exploitability": "HIGH",
+      "impact": "Complete authentication bypass",
+      "remediation": {
+        "effort": "HIGH",
+        "description": "Implement proper user database with secure password storage using bcrypt hashing",
+        "code_example": "async def authenticate_user(username: str, password: str):\n    user = await get_user_from_database(username)\n    if not user or not verify_password(password, user.hashed_password):\n        return False\n    return user"
+      }
+    },
+    {
+      "id": "CRITICAL-002",
+      "severity": "CRITICAL",
+      "category": "Data Protection",
+      "title": "Database Credentials in Environment Variables",
+      "description": "Supabase database credentials are stored in environment variables which can be exposed through process listings, memory dumps, or logs.",
+      "location": {
+        "file": "src/utils/config.py",
+        "lines": "14-15",
+        "function": "Config class"
+      },
+      "owasp_category": "A02:2021 - Cryptographic Failures",
+      "cwe": "CWE-522",
+      "cvss_score": 8.5,
+      "exploitability": "MEDIUM",
+      "impact": "Full database access",
+      "remediation": {
+        "effort": "MEDIUM",
+        "description": "Use secure secret management service like AWS Secrets Manager or HashiCorp Vault",
+        "code_example": "# Use boto3 for AWS Secrets Manager\nsecrets_client = boto3.client('secretsmanager')\ndb_secret = json.loads(secrets_client.get_secret_value(SecretId='tkr-news-db')['SecretString'])"
+      }
+    },
+    {
+      "id": "HIGH-001",
+      "severity": "HIGH",
+      "category": "Authentication",
+      "title": "Weak JWT Secret Key Generation",
+      "description": "JWT secret key falls back to auto-generated value if not configured, causing all tokens to be invalidated on application restart.",
+      "location": {
+        "file": "src/utils/security.py",
+        "lines": "44",
+        "function": "_generate_secret_key"
+      },
+      "owasp_category": "A02:2021 - Cryptographic Failures",
+      "cwe": "CWE-326",
+      "cvss_score": 7.5,
+      "exploitability": "LOW",
+      "impact": "Service disruption, token invalidation",
+      "remediation": {
+        "effort": "LOW",
+        "description": "Enforce JWT_SECRET_KEY configuration at startup and fail fast if not provided",
+        "code_example": "if not self.config.JWT_SECRET_KEY:\n    raise ValueError('JWT_SECRET_KEY must be configured for production')"
+      }
+    },
+    {
+      "id": "HIGH-002",
+      "severity": "HIGH",
+      "category": "Data Protection",
+      "title": "API Keys Stored in Plain Text",
+      "description": "API keys are stored as comma-separated values in environment variables, visible in process listings and potentially in logs.",
+      "location": {
+        "file": "src/utils/config.py",
+        "lines": "31",
+        "function": "Config.API_KEYS"
+      },
+      "owasp_category": "A02:2021 - Cryptographic Failures",
+      "cwe": "CWE-256",
+      "cvss_score": 7.5,
+      "exploitability": "MEDIUM",
+      "impact": "API key exposure",
+      "remediation": {
+        "effort": "MEDIUM",
+        "description": "Store API keys in secure secret management service with proper access controls",
+        "code_example": "# Store each API key separately in secrets manager\napi_keys = await secret_manager.get_api_keys('tkr-news-api-keys')"
+      }
+    },
+    {
+      "id": "HIGH-003",
+      "severity": "HIGH",
+      "category": "Dependencies",
+      "title": "Known Vulnerabilities in Dependencies",
+      "description": "Dependencies like lxml and aiohttp have history of security vulnerabilities. Continuous monitoring required.",
+      "location": {
+        "file": "requirements.txt",
+        "lines": "10-11",
+        "function": "N/A"
+      },
+      "owasp_category": "A06:2021 - Vulnerable and Outdated Components",
+      "cwe": "CWE-1104",
+      "cvss_score": 7.0,
+      "exploitability": "MEDIUM",
+      "impact": "Various (XXE, header injection)",
+      "remediation": {
+        "effort": "LOW",
+        "description": "Implement automated dependency scanning in CI/CD pipeline",
+        "code_example": "# Add to CI/CD pipeline\n- name: Security Scan\n  run: |\n    pip-audit\n    safety check\n    bandit -r src/"
+      }
+    },
+    {
+      "id": "HIGH-004",
+      "severity": "HIGH",
+      "category": "Database Security",
+      "title": "Overly Permissive Row Level Security",
+      "description": "Database RLS policies allow public read access to all tables without authentication.",
+      "location": {
+        "file": "database/schema.sql",
+        "lines": "103-117",
+        "function": "RLS policies"
+      },
+      "owasp_category": "A01:2021 - Broken Access Control",
+      "cwe": "CWE-732",
+      "cvss_score": 6.5,
+      "exploitability": "HIGH",
+      "impact": "Information disclosure",
+      "remediation": {
+        "effort": "MEDIUM",
+        "description": "Implement authentication-based RLS policies",
+        "code_example": "CREATE POLICY 'Authenticated users can read articles' ON articles\n  FOR SELECT USING (auth.role() = 'authenticated');"
+      }
+    },
+    {
+      "id": "MEDIUM-001",
+      "severity": "MEDIUM",
+      "category": "Input Validation",
+      "title": "Potential SSRF Bypass via DNS Rebinding",
+      "description": "URL validation may be bypassed using DNS rebinding attacks or URL shorteners.",
+      "location": {
+        "file": "src/utils/security.py",
+        "lines": "89-129",
+        "function": "validate_url"
+      },
+      "owasp_category": "A10:2021 - Server-Side Request Forgery",
+      "cwe": "CWE-918",
+      "cvss_score": 6.0,
+      "exploitability": "MEDIUM",
+      "impact": "Internal network access",
+      "remediation": {
+        "effort": "MEDIUM",
+        "description": "Add DNS resolution validation and follow redirects checking",
+        "code_example": "# Resolve DNS and validate IP\nip = socket.gethostbyname(parsed.hostname)\nif not validate_ip_address(ip):\n    raise ValueError('Invalid resolved IP')"
+      }
+    },
+    {
+      "id": "MEDIUM-002",
+      "severity": "MEDIUM",
+      "category": "Input Validation",
+      "title": "Missing Content-Type Validation",
+      "description": "No validation of HTTP response Content-Type before processing, potentially allowing XXE attacks.",
+      "location": {
+        "file": "src/news/article_scraper.py",
+        "lines": "N/A",
+        "function": "scrape_article"
+      },
+      "owasp_category": "A03:2021 - Injection",
+      "cwe": "CWE-434",
+      "cvss_score": 5.5,
+      "exploitability": "LOW",
+      "impact": "XXE, malicious content processing",
+      "remediation": {
+        "effort": "LOW",
+        "description": "Validate Content-Type headers before parsing responses",
+        "code_example": "if response.headers.get('content-type', '').lower() not in ['text/html', 'application/xhtml+xml']:\n    raise ValueError('Invalid content type')"
+      }
+    },
+    {
+      "id": "MEDIUM-003",
+      "severity": "MEDIUM",
+      "category": "Data Protection",
+      "title": "No Encryption at Rest",
+      "description": "Sensitive article content and processed data stored unencrypted in database.",
+      "location": {
+        "file": "database/schema.sql",
+        "lines": "27-28",
+        "function": "articles table"
+      },
+      "owasp_category": "A02:2021 - Cryptographic Failures",
+      "cwe": "CWE-311",
+      "cvss_score": 5.5,
+      "exploitability": "LOW",
+      "impact": "Data exposure if database compromised",
+      "remediation": {
+        "effort": "HIGH",
+        "description": "Enable database encryption or implement field-level encryption",
+        "code_example": "# Enable Supabase encryption\nALTER TABLE articles ENABLE ROW LEVEL ENCRYPTION;\n# Or use application-level encryption\ncontent_encrypted = encrypt_field(content, key)"
+      }
+    },
+    {
+      "id": "MEDIUM-004",
+      "severity": "MEDIUM",
+      "category": "Supply Chain",
+      "title": "No Software Bill of Materials",
+      "description": "No SBOM generation for tracking transitive dependencies and supply chain security.",
+      "location": {
+        "file": "Project root",
+        "lines": "N/A",
+        "function": "N/A"
+      },
+      "owasp_category": "A06:2021 - Vulnerable and Outdated Components",
+      "cwe": "CWE-1104",
+      "cvss_score": 5.0,
+      "exploitability": "LOW",
+      "impact": "Unknown vulnerabilities",
+      "remediation": {
+        "effort": "LOW",
+        "description": "Generate SBOM in CI/CD pipeline",
+        "code_example": "# Add to CI/CD\ncyclonedx-py -o sbom.json\n# Upload to dependency track or similar"
+      }
+    },
+    {
+      "id": "MEDIUM-005",
+      "severity": "MEDIUM",
+      "category": "API Security",
+      "title": "In-Memory Rate Limiting Bypass",
+      "description": "Rate limiting uses in-memory storage, allowing bypass through distributed attacks or server restarts.",
+      "location": {
+        "file": "src/utils/middleware.py",
+        "lines": "205-248",
+        "function": "RateLimitingMiddleware"
+      },
+      "owasp_category": "A04:2021 - Insecure Design",
+      "cwe": "CWE-770",
+      "cvss_score": 5.0,
+      "exploitability": "MEDIUM",
+      "impact": "DoS attacks",
+      "remediation": {
+        "effort": "MEDIUM",
+        "description": "Implement Redis-based distributed rate limiting",
+        "code_example": "# Use Redis for rate limiting\nfrom slowapi.util import get_remote_address\nfrom slowapi import Limiter\nlimiter = Limiter(\n    key_func=get_remote_address,\n    storage_uri='redis://localhost:6379'\n)"
+      }
+    },
+    {
+      "id": "MEDIUM-006",
+      "severity": "MEDIUM",
+      "category": "Database Security",
+      "title": "No Database Audit Logging",
+      "description": "No audit trail for database modifications, making it impossible to track unauthorized changes.",
+      "location": {
+        "file": "database/schema.sql",
+        "lines": "N/A",
+        "function": "N/A"
+      },
+      "owasp_category": "A09:2021 - Security Logging and Monitoring Failures",
+      "cwe": "CWE-778",
+      "cvss_score": 4.5,
+      "exploitability": "LOW",
+      "impact": "Forensics capability loss",
+      "remediation": {
+        "effort": "MEDIUM",
+        "description": "Implement audit logging triggers for sensitive tables",
+        "code_example": "CREATE TABLE audit_log (\n  id SERIAL PRIMARY KEY,\n  table_name TEXT,\n  operation TEXT,\n  user_id UUID,\n  changed_data JSONB,\n  created_at TIMESTAMP DEFAULT NOW()\n);"
+      }
+    },
+    {
+      "id": "MEDIUM-007",
+      "severity": "MEDIUM",
+      "category": "Container Security",
+      "title": "No Container Vulnerability Scanning",
+      "description": "Docker containers not scanned for vulnerabilities in base images or installed packages.",
+      "location": {
+        "file": "Dockerfile",
+        "lines": "N/A",
+        "function": "N/A"
+      },
+      "owasp_category": "A06:2021 - Vulnerable and Outdated Components",
+      "cwe": "CWE-1104",
+      "cvss_score": 4.5,
+      "exploitability": "LOW",
+      "impact": "Vulnerable container deployment",
+      "remediation": {
+        "effort": "LOW",
+        "description": "Integrate container scanning in CI/CD",
+        "code_example": "# Add to CI/CD\n- name: Scan Docker Image\n  run: |\n    trivy image tkr-news-gather:latest\n    grype tkr-news-gather:latest"
+      }
+    },
+    {
+      "id": "LOW-001",
+      "severity": "LOW",
+      "category": "API Security",
+      "title": "Missing API Versioning",
+      "description": "No API versioning strategy implemented, risking breaking changes for clients.",
+      "location": {
+        "file": "src/main_secure.py",
+        "lines": "API endpoints",
+        "function": "Various"
+      },
+      "owasp_category": "A04:2021 - Insecure Design",
+      "cwe": "CWE-1059",
+      "cvss_score": 3.0,
+      "exploitability": "LOW",
+      "impact": "Client compatibility issues",
+      "remediation": {
+        "effort": "LOW",
+        "description": "Implement API versioning strategy",
+        "code_example": "# Add version prefix\napp.include_router(v1_router, prefix='/api/v1')\napp.include_router(v2_router, prefix='/api/v2')"
+      }
+    },
+    {
+      "id": "LOW-002",
+      "severity": "LOW",
+      "category": "Authentication",
+      "title": "Username Enumeration via Timing Attack",
+      "description": "Different response times for valid vs invalid usernames allow enumeration.",
+      "location": {
+        "file": "src/main_secure.py",
+        "lines": "141-157",
+        "function": "login_for_access_token"
+      },
+      "owasp_category": "A07:2021 - Identification and Authentication Failures",
+      "cwe": "CWE-208",
+      "cvss_score": 3.0,
+      "exploitability": "LOW",
+      "impact": "Username disclosure",
+      "remediation": {
+        "effort": "LOW",
+        "description": "Add consistent delay for all authentication failures",
+        "code_example": "# Always perform password hash even for invalid users\nif not user:\n    pwd_context.hash('dummy_password')  # Same computation time\n    await asyncio.sleep(0.1)  # Consistent delay\nraise HTTPException(401, 'Invalid credentials')"
+      }
+    },
+    {
+      "id": "LOW-003",
+      "severity": "LOW",
+      "category": "Security Headers",
+      "title": "Permissive Content Security Policy",
+      "description": "CSP allows 'unsafe-inline' for scripts and styles, reducing XSS protection.",
+      "location": {
+        "file": "src/utils/middleware.py",
+        "lines": "42",
+        "function": "SecurityHeadersMiddleware"
+      },
+      "owasp_category": "A05:2021 - Security Misconfiguration",
+      "cwe": "CWE-1021",
+      "cvss_score": 2.5,
+      "exploitability": "LOW",
+      "impact": "Reduced XSS protection",
+      "remediation": {
+        "effort": "MEDIUM",
+        "description": "Use nonces or hashes instead of unsafe-inline",
+        "code_example": "# Generate nonce for each request\nnonce = secrets.token_urlsafe(16)\ncsp = f\"script-src 'self' 'nonce-{nonce}'; style-src 'self' 'nonce-{nonce}';\""
+      }
+    },
+    {
+      "id": "LOW-004",
+      "severity": "LOW",
+      "category": "Error Handling",
+      "title": "Generic Error Messages May Leak Information",
+      "description": "Some error messages might reveal system information in edge cases.",
+      "location": {
+        "file": "src/utils/middleware.py",
+        "lines": "136-186",
+        "function": "ErrorHandlingMiddleware"
+      },
+      "owasp_category": "A04:2021 - Insecure Design",
+      "cwe": "CWE-209",
+      "cvss_score": 2.0,
+      "exploitability": "LOW",
+      "impact": "Information disclosure",
+      "remediation": {
+        "effort": "LOW",
+        "description": "Implement comprehensive error message sanitization",
+        "code_example": "ERROR_MESSAGES = {\n    'database': 'Service temporarily unavailable',\n    'auth': 'Authentication failed',\n    'validation': 'Invalid request'\n}"
+      }
+    },
+    {
+      "id": "LOW-005",
+      "severity": "LOW",
+      "category": "Logging",
+      "title": "User Agent Not Fully Sanitized",
+      "description": "User agent logging truncates at 100 chars but doesn't sanitize special characters.",
+      "location": {
+        "file": "src/utils/middleware.py",
+        "lines": "81",
+        "function": "RequestLoggingMiddleware"
+      },
+      "owasp_category": "A09:2021 - Security Logging and Monitoring Failures",
+      "cwe": "CWE-117",
+      "cvss_score": 1.5,
+      "exploitability": "LOW",
+      "impact": "Log injection",
+      "remediation": {
+        "effort": "LOW",
+        "description": "Sanitize user agent before logging",
+        "code_example": "# Sanitize user agent\nimport re\nuser_agent = re.sub(r'[\\n\\r\\t]', '', user_agent[:100])"
+      }
+    }
+  ],
+  "security_controls": {
+    "implemented": [
+      "JWT authentication with scopes",
+      "API key authentication",
+      "Input validation on all endpoints",
+      "SSRF protection",
+      "Rate limiting",
+      "Security headers",
+      "CORS configuration",
+      "Password hashing with bcrypt",
+      "Row Level Security",
+      "Request logging with IDs",
+      "Error sanitization"
+    ],
+    "missing": [
+      "User database implementation",
+      "Secure secret management",
+      "Encryption at rest",
+      "Container scanning",
+      "SBOM generation",
+      "Database audit logging",
+      "API versioning",
+      "Distributed rate limiting"
+    ]
+  },
+  "recommendations": {
+    "immediate": [
+      "Remove hardcoded credentials from source code",
+      "Implement proper user authentication system",
+      "Move all secrets to secure management service",
+      "Fix overly permissive database RLS policies"
+    ],
+    "short_term": [
+      "Implement Redis-based rate limiting",
+      "Add automated container scanning",
+      "Enhance Content Security Policy",
+      "Add database audit logging",
+      "Set up dependency vulnerability scanning"
+    ],
+    "long_term": [
+      "Implement field-level encryption",
+      "Add multi-factor authentication",
+      "Establish SBOM generation pipeline",
+      "Conduct quarterly penetration testing",
+      "Implement API versioning strategy"
+    ]
+  }
+}
