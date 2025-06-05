@@ -1,6 +1,20 @@
 # Pre-commit hooks for code quality and security
 # Updated: 2025-01-04
 
+# Pre-commit is integrated into the development
+#   workflow but not currently activated. It's configured
+#    in:
+#    
+#   - requirements-dev.txt:30 and pyproject.toml:77 as
+#   dependencies
+#   - Makefile:81-83 with install and run commands
+#   - Makefile:46 included in the setup process
+# 
+#   The hooks check code formatting (Black, isort),
+#   quality (flake8), security (bandit, safety), and
+#   Docker linting. To activate, run make pre-commit or
+# pre-commit install.
+
 repos:
   # Code formatting
   - repo: https://github.com/psf/black

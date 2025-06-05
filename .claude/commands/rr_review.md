@@ -1,3 +1,5 @@
+Complete the following tasks to ensure parallel agents create a full repo-review. 
+
 CREATE shared config:
 - WRITE to `${REPO_PATH}/_project/repo-review/reports/analysis.config.json`:
   ```json

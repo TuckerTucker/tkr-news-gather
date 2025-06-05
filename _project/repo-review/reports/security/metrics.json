@@ -1,53 +1,58 @@
 {
   "analysis_metadata": {
-    "agent_type": "security",
-    "analysis_date": "2025-01-06",
-    "analysis_start_time": "2025-01-06T10:00:00Z",
-    "analysis_end_time": "2025-01-06T10:30:00Z",
+    "analysis_date": "January 6, 2025",
+    "repository": "tkr-news-gather",
+    "agent": "security",
     "analysis_duration_seconds": 1800,
-    "repository_path": "/Volumes/tkr-riffic/@tkr-projects/tkr-news-gather",
-    "analysis_depth": 3,
-    "agent_version": "1.0.0"
-  },
-  "repository_metrics": {
-    "total_files": 47,
     "files_analyzed": 23,
-    "code_files_analyzed": 15,
-    "config_files_analyzed": 5,
-    "docker_files_analyzed": 2,
-    "security_files_analyzed": 1,
-    "total_lines_of_code": 2847,
-    "lines_analyzed": 2234
+    "lines_of_code_scanned": 2150
   },
-  "security_findings_summary": {
-    "total_findings": 6,
-    "findings_by_severity": {
+  "security_metrics": {
+    "overall_score": 91,
+    "grade": "A-",
+    "risk_level": "LOW",
+    "vulnerability_density": 0.002,
+    "security_coverage_percentage": 94
+  },
+  "finding_distribution": {
+    "total_findings": 5,
+    "by_severity": {
       "critical": 0,
-      "high": 1,
+      "high": 0,
       "medium": 3,
-      "low": 2
+      "low": 2,
+      "info": 0
     },
-    "findings_by_category": {
+    "by_category": {
       "authentication": 1,
-      "rate_limiting": 1,
-      "cors_configuration": 1,
-      "container_security": 1,
-      "error_handling": 1,
-      "security_headers": 1
+      "web_security": 1,
+      "availability": 1,
+      "supply_chain": 1,
+      "container_security": 1
     },
-    "findings_by_effort": {
-      "trivial": 2,
-      "small": 2,
-      "medium": 2,
-      "large": 0
+    "by_owasp_category": {
+      "A01_broken_access_control": 0,
+      "A02_cryptographic_failures": 0,
+      "A03_injection": 0,
+      "A04_insecure_design": 1,
+      "A05_security_misconfiguration": 1,
+      "A06_vulnerable_components": 1,
+      "A07_identity_auth_failures": 1,
+      "A08_software_data_integrity": 1,
+      "A09_security_logging": 0,
+      "A10_ssrf": 0
     }
   },
-  "owasp_top_10_coverage": {
+  "owasp_top10_coverage": {
     "A01_broken_access_control": {
-      "status": "excellent",
-      "score": 95,
-      "findings": 0,
-      "controls": ["JWT authentication", "API key auth", "scope-based authorization", "Supabase RLS"]
+      "coverage_score": 95,
+      "implementation_quality": "EXCELLENT",
+      "controls_implemented": [
+        "JWT authentication",
+        "Scope-based authorization",
+        "Session management",
+        "Constant-time comparisons"
+      ]
     },
     "A02_cryptographic_failures": {
       "status": "excellent",

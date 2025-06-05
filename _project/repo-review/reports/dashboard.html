@@ -798,14 +798,62 @@
                 }).join('');
 
                 // Update page title and metadata
-                if (this.reports.overview && this.reports.overview.findings) {
-                    const metadata = this.reports.overview.findings.metadata;
-                    if (metadata) {
-                        document.getElementById('repo-title').textContent = 
-                            `${metadata.repository?.name || 'Repository'} - Analysis Dashboard`;
-                        document.getElementById('generation-info').textContent = 
-                            `Generated on ${new Date(metadata.analysis_date).toLocaleDateString()} | ${metadata.merged_agents?.join(', ') || 'Multiple'} agents`;
+                if (this.reports.overview) {
+                    // Try to get metadata from various sources
+                    let metadata = null;
+                    let displayDate = 'Unknown';
+                    let repositoryName = 'Repository';
+                    
+                    // Check findings metadata first (merged reports)
+                    if (this.reports.overview.findings && this.reports.overview.findings.metadata) {
+                        metadata = this.reports.overview.findings.metadata;
+                        repositoryName = metadata.repository?.name || 'Repository';
+                        if (metadata.analysis_date) {
+                            // If already in text format, use as-is; otherwise parse and format
+                            if (metadata.analysis_date.includes(',')) {
+                                displayDate = metadata.analysis_date;
+                            } else {
+                                const date = new Date(metadata.analysis_date);
+                                displayDate = date.toLocaleDateString('en-US', { 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                });
+                            }
+                        }
                     }
+                    // Check metrics metadata (individual agent reports)
+                    else if (this.reports.overview.metrics) {
+                        const metricsData = this.reports.overview.metrics;
+                        // Try different metadata structures
+                        const metadataFields = ['repository_metrics', 'analysis_metadata', 'metadata'];
+                        for (const field of metadataFields) {
+                            if (metricsData[field]) {
+                                metadata = metricsData[field];
+                                repositoryName = metadata.name || metadata.repository || 'Repository';
+                                const dateField = metadata.analysis_date || metadata.timestamp;
+                                if (dateField) {
+                                    // If already in text format, use as-is; otherwise parse and format
+                                    if (dateField.includes(',')) {
+                                        displayDate = dateField;
+                                    } else {
+                                        const date = new Date(dateField);
+                                        displayDate = date.toLocaleDateString('en-US', { 
+                                            year: 'numeric', 
+                                            month: 'long', 
+                                            day: 'numeric' 
+                                        });
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    
+                    document.getElementById('repo-title').textContent = 
+                        `${repositoryName} - Analysis Dashboard`;
+                    document.getElementById('generation-info').textContent = 
+                        `Generated on ${displayDate} | ${metadata?.merged_agents?.join(', ') || 'Multiple'} agents`;
                 }
             }
 

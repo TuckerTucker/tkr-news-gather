@@ -1,0 +1,3 @@
+#!/bin/bash
+
+node _project/repo-review/reports/server.js

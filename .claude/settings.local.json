@@ -41,7 +41,10 @@
       "Bash(grep:*)",
       "Bash(find:*)",
       "Bash(search:*)",
-      "Search(pattern:*)"
+      "Search(pattern:*, include:*)",
+      "Search(pattern:*)",
+      "List(*)",
+      "Search"
     ],
     "deny": [
       "Bash(rm -rf /)",
