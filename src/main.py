@@ -6,7 +6,7 @@ import asyncio
 from datetime import datetime
 
 from .api import NewsGatherAPI
-from .utils import Config, SupabaseClient, get_logger
+from .utils import Config, SupabaseClient, LocalStorage, get_logger
 from .news import get_all_provinces
 
 logger = get_logger(__name__)
@@ -31,6 +31,7 @@ app.add_middleware(
 config = Config()
 news_api = NewsGatherAPI()
 supabase = SupabaseClient(config)
+local_storage = LocalStorage("news_data")
 
 # Pydantic models for request/response
 class NewsRequest(BaseModel):
@@ -124,7 +125,8 @@ async def get_news(
     province: str,
     limit: int = Query(10, ge=1, le=50, description="Number of articles to fetch"),
     scrape: bool = Query(True, description="Whether to scrape full article content"),
-    save_to_db: bool = Query(False, description="Whether to save results to database")
+    save_to_db: bool = Query(False, description="Whether to save results to database"),
+    save_to_local: bool = Query(False, description="Whether to save results to local filesystem")
 ):
     """Get news for a specific Canadian province"""
     try:
@@ -137,6 +139,16 @@ async def get_news(
             if session_id and result.get("results"):
                 await supabase.save_articles(session_id, result["results"])
                 result["metadata"]["session_id"] = session_id
+        
+        # Save to local filesystem if requested
+        if save_to_local and result.get("status") == "success" and result.get("results"):
+            local_path = local_storage.save_news_session(
+                province=province,
+                articles=result["results"],
+                metadata=result.get("metadata", {})
+            )
+            if local_path:
+                result["metadata"]["local_path"] = local_path
         
         return result
     except Exception as e:
@@ -273,6 +285,53 @@ async def get_session_articles(
         }
     except Exception as e:
         logger.error(f"Error getting session articles: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Local storage endpoints
+@app.get("/local/sessions", tags=["Local Storage"])
+async def get_local_sessions(
+    province: Optional[str] = Query(None, description="Filter by province")
+):
+    """List all locally saved news sessions"""
+    try:
+        sessions = local_storage.list_sessions(province)
+        return {
+            "sessions": sessions,
+            "total": len(sessions)
+        }
+    except Exception as e:
+        logger.error(f"Error listing local sessions: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/local/sessions/{province}/latest", tags=["Local Storage"])
+async def get_latest_local_session(province: str):
+    """Get the latest locally saved session for a province"""
+    try:
+        session = local_storage.get_latest_session(province)
+        if not session:
+            raise HTTPException(
+                status_code=404,
+                detail=f"No local sessions found for {province}"
+            )
+        return session
+    except Exception as e:
+        logger.error(f"Error getting latest local session: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/local/sessions/old", tags=["Local Storage"])
+async def cleanup_old_sessions(
+    days_to_keep: int = Query(30, ge=1, description="Number of days to keep")
+):
+    """Delete local sessions older than specified days"""
+    try:
+        deleted_count = local_storage.delete_old_sessions(days_to_keep)
+        return {
+            "status": "success",
+            "deleted_count": deleted_count,
+            "message": f"Deleted {deleted_count} sessions older than {days_to_keep} days"
+        }
+    except Exception as e:
+        logger.error(f"Error cleaning up old sessions: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # Background task for full news pipeline

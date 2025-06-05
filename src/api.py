@@ -23,7 +23,7 @@ class NewsGatherAPI:
         try:
             # Fetch news from Google News
             logger.info(f"Fetching news for {province}, limit={limit}")
-            articles = self.news_client.get_news_by_province(province, limit)
+            articles = await self.news_client.get_news_by_province_async(province, limit)
             
             if not articles:
                 return {
@@ -72,6 +72,7 @@ class NewsGatherAPI:
             return {
                 "status": "error",
                 "error": str(e),
+                "totalResults": 0,
                 "results": [],
                 "metadata": {
                     "province": province,

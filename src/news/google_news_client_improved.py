@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 import logging
 import asyncio
 from dataclasses import dataclass
-from .google_news_decoder import GoogleNewsDecoder
+from .google_news_decoder import decode_google_news_url
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ class ImprovedGoogleNewsClient:
     def __init__(self, timeout: int = 30, max_retries: int = 3):
         self.timeout = timeout
         self.max_retries = max_retries
-        self.decoder = GoogleNewsDecoder()
+        # Decoder function imported above
         
         # Configure HTTP client with security headers
         self.client = httpx.AsyncClient(
@@ -218,7 +218,7 @@ class ImprovedGoogleNewsClient:
             link = getattr(entry, 'link', '')
             if link:
                 # Decode Google News URL if needed
-                link = self.decoder.decode_url(link)
+                link = decode_google_news_url(link)
             
             # Parse published date
             published = self._parse_date(entry)
