@@ -107,7 +107,3 @@ tmp/
 
 # Docker
 .dockerignore
-
-# Claude Code
-.claude/commands/
-.claude/settings.local.json
