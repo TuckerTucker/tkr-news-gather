@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 # Create reports directory
 mkdir -p "$REPORTS_DIR"
 
-echo -e "${BLUE}🔍 TKR News Gatherer - Dependency Security Check${NC}"
+echo -e "${BLUE}🔍 TKR News Gather - Dependency Security Check${NC}"
 echo -e "${BLUE}================================================${NC}"
 echo ""
 
@@ -209,7 +209,7 @@ echo "-----------------------------"
 SUMMARY_FILE="$REPORTS_DIR/security-summary.md"
 
 cat > "$SUMMARY_FILE" << EOF
-# TKR News Gatherer - Security Analysis Summary
+# TKR News Gather - Security Analysis Summary
 
 **Date:** $(date)
 **Scan Type:** Local dependency and security analysis
@@ -217,7 +217,7 @@ cat > "$SUMMARY_FILE" << EOF
 
 ## Executive Summary
 
-This report provides a comprehensive analysis of dependency security, code vulnerabilities, and license compliance for the TKR News Gatherer project.
+This report provides a comprehensive analysis of dependency security, code vulnerabilities, and license compliance for the TKR News Gather project.
 
 ## Scan Results
 

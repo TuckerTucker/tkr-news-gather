@@ -1,4 +1,4 @@
--- Supabase Database Schema for TKR News Gatherer
+-- Supabase Database Schema for TKR News Gather
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

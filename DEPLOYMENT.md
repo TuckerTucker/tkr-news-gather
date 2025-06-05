@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide walks you through deploying the TKR News Gatherer as a serverless endpoint on RunPod.
+This guide walks you through deploying the TKR News Gather as a serverless endpoint on RunPod.
 
 ## Prerequisites
 
@@ -34,7 +34,7 @@ docker push your-dockerhub-username/tkr-news-gather:latest
    - Click "New Endpoint"
 
 3. **Configure the Endpoint**
-   - **Name**: `tkr-news-gatherer`
+   - **Name**: `tkr-news-gather`
    - **Container Image**: `your-dockerhub-username/tkr-news-gather:latest`
    - **Container Registry Credentials**: Add your Docker Hub credentials if image is private
 

@@ -1,8 +1,20 @@
-# TKR News Gatherer - RunPod Deployment Guide
-Generated: 2025-06-05 12:01:19
+# TKR News Gather - RunPod Deployment Guide
+Generated: 2025-06-05 12:32:29
 
 ## 🐳 Docker Image
 Your image has been pushed to: `tuckertucker/tkr-news-gather:latest`
+
+## ✅ Template Created Successfully!
+- **Template ID**: `rxaw4dxqtm`
+- **Template Name**: `tkr-news-gatherer-template`
+
+Your template is ready! Use it to create a serverless endpoint in the RunPod dashboard.
+
+## ✅ Endpoint Created Successfully!
+- **Endpoint ID**: `d0w22s1p9xfvnt`
+- **Endpoint URL**: `https://api.runpod.io/v2/d0w22s1p9xfvnt/runsync`
+
+Your endpoint is ready to use! Skip to the "Testing Your Deployment" section below.
 
 ## 🚀 RunPod Endpoint Configuration
 
@@ -47,16 +59,16 @@ LLM_MAX_TOKENS=200000
 ## 🧪 Testing Your Deployment
 
 ### Test Endpoints
-Once deployed, your endpoint URL will be:
-`https://api.runpod.ai/v2/YOUR-ENDPOINT-ID/runsync`
+Your endpoint URL is:
+`https://api.runpod.io/v2/d0w22s1p9xfvnt/runsync`
 
 ### Sample Test Requests
 
 **Get Provinces:**
 ```bash
-curl -X POST https://api.runpod.ai/v2/YOUR-ENDPOINT-ID/runsync \
+curl -X POST https://api.runpod.io/v2/d0w22s1p9xfvnt/runsync \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR-RUNPOD-API-KEY" \
+  -H "Authorization: Bearer rpa_173ARN..." \
   -d '{
     "input": {
       "action": "get_provinces"
@@ -66,9 +78,9 @@ curl -X POST https://api.runpod.ai/v2/YOUR-ENDPOINT-ID/runsync \
 
 **Get News for Alberta:**
 ```bash
-curl -X POST https://api.runpod.ai/v2/YOUR-ENDPOINT-ID/runsync \
+curl -X POST https://api.runpod.io/v2/d0w22s1p9xfvnt/runsync \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR-RUNPOD-API-KEY" \
+  -H "Authorization: Bearer rpa_173ARN..." \
   -d '{
     "input": {
       "action": "get_news",
@@ -81,9 +93,9 @@ curl -X POST https://api.runpod.ai/v2/YOUR-ENDPOINT-ID/runsync \
 
 **Process News with AI:**
 ```bash
-curl -X POST https://api.runpod.ai/v2/YOUR-ENDPOINT-ID/runsync \
+curl -X POST https://api.runpod.io/v2/d0w22s1p9xfvnt/runsync \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR-RUNPOD-API-KEY" \
+  -H "Authorization: Bearer rpa_173ARN..." \
   -d '{
     "input": {
       "action": "fetch_and_process",
@@ -97,16 +109,19 @@ curl -X POST https://api.runpod.ai/v2/YOUR-ENDPOINT-ID/runsync \
 
 ## 📋 Manual RunPod Setup Steps
 
-1. **Login to RunPod**: Go to https://runpod.io and sign in
-2. **Navigate to Serverless**: Click "Serverless" in the top menu
-3. **Create New Endpoint**: Click "New Endpoint"
-4. **Configure Endpoint**:
-   - Name: `tkr-news-gatherer`
-   - Container Image: `tuckertucker/tkr-news-gather:latest`
-   - Environment Variables: Copy from the section above
-   - Resources: Set as specified in Resource Configuration
+### Step 1: Template Already Created ✅
+Your template `rxaw4dxqtm` is ready to use.
+
+### Step 2: Create Serverless Endpoint
+1. **Navigate to Serverless**: Click "Serverless" in the top menu
+2. **Create New Endpoint**: Click "New Endpoint"
+3. **Select Template**: Choose your template `rxaw4dxqtm`
+4. **Configure Scaling**:
+   - Max Workers: 5
+   - Idle Timeout: 30 seconds
+   - Execution Timeout: 600 seconds
 5. **Deploy**: Click "Deploy" and wait for the endpoint to be ready
-6. **Test**: Use the sample requests above to test your deployment
+6. **Copy Endpoint ID**: Save the endpoint ID for testing
 
 ## 🔒 Security Notes
 
@@ -126,4 +141,4 @@ If your deployment fails:
 ## 📞 Support
 
 - RunPod Documentation: https://docs.runpod.io
-- TKR News Gatherer Issues: Create an issue in the project repository
+- TKR News Gather Issues: Create an issue in the project repository

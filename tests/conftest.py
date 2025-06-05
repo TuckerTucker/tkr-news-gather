@@ -1,5 +1,5 @@
 """
-Pytest configuration and shared fixtures for TKR News Gatherer tests
+Pytest configuration and shared fixtures for TKR News Gather tests
 """
 
 import pytest

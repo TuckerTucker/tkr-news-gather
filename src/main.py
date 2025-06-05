@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="TKR News Gatherer API",
+    title="TKR News Gather API",
     description="Canadian news collection and AI processing service",
     version="0.1.0"
 )
@@ -63,7 +63,7 @@ class ProcessedResponse(BaseModel):
 async def root():
     """Health check endpoint"""
     return {
-        "service": "TKR News Gatherer",
+        "service": "TKR News Gather",
         "version": "0.1.0",
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat()
@@ -73,7 +73,7 @@ async def root():
 async def health_check():
     """Detailed health check"""
     health_status = {
-        "service": "TKR News Gatherer",
+        "service": "TKR News Gather",
         "version": "0.1.0",
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat(),

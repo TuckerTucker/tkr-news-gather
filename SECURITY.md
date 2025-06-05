@@ -2,7 +2,7 @@
 
 ## Overview
 
-The TKR News Gatherer has been enhanced with comprehensive security controls to address all critical vulnerabilities identified in the security analysis. This document outlines the implemented security measures and operational procedures.
+The TKR News Gather has been enhanced with comprehensive security controls to address all critical vulnerabilities identified in the security analysis. This document outlines the implemented security measures and operational procedures.
 
 ## 🔒 Security Features Implemented
 

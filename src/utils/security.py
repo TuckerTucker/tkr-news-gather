@@ -1,5 +1,5 @@
 """
-Security utilities for TKR News Gatherer
+Security utilities for TKR News Gather
 Implements JWT authentication, rate limiting, input validation, and security headers
 """
 

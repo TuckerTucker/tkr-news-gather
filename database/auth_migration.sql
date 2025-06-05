@@ -1,4 +1,4 @@
--- Authentication Migration for TKR News Gatherer
+-- Authentication Migration for TKR News Gather
 -- Adds user authentication and proper RLS policies
 
 -- Create user profiles table to extend Supabase auth.users

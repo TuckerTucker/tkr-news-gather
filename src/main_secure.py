@@ -1,5 +1,5 @@
 """
-Secure FastAPI application for TKR News Gatherer
+Secure FastAPI application for TKR News Gather
 Implements comprehensive security controls including authentication, rate limiting, 
 input validation, and security headers
 """
@@ -50,7 +50,7 @@ if not config.API_KEYS:
 
 # Initialize FastAPI app with security settings
 app = FastAPI(
-    title="TKR News Gatherer API",
+    title="TKR News Gather API",
     description="Secure Canadian news collection and AI processing service with authentication",
     version="0.1.0",
     docs_url="/docs" if config.DEBUG else None,  # Disable docs in production

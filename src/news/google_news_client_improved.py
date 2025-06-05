@@ -50,7 +50,7 @@ class ImprovedGoogleNewsClient:
         self.client = httpx.AsyncClient(
             timeout=timeout,
             headers={
-                'User-Agent': 'TKRNewsGatherer/1.0 (https://github.com/tkr-news-gather)',
+                'User-Agent': 'TKRNewsGather/1.0 (https://github.com/tkr-news-gather)',
                 'Accept': 'application/rss+xml, application/xml, text/xml',
                 'Accept-Language': 'en-US,en;q=0.9',
                 'Cache-Control': 'no-cache',

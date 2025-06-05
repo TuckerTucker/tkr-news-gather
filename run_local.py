@@ -10,7 +10,7 @@ async def test_news_gather():
     """Test the news gathering functionality"""
     api = NewsGatherAPI()
     
-    print("\n=== Testing News Gatherer ===\n")
+    print("\n=== Testing News Gather ===\n")
     
     # Test 1: Get available provinces
     print("1. Getting available provinces...")
@@ -66,7 +66,7 @@ async def test_specific_url():
 
 def main():
     """Main entry point"""
-    print("Starting TKR News Gatherer Tests...")
+    print("Starting TKR News Gather Tests...")
     
     # Run the tests
     asyncio.run(test_news_gather())

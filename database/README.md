@@ -1,6 +1,6 @@
 # Database Schema Files
 
-This directory contains different SQL schema files for setting up the TKR News Gatherer database. Choose the appropriate file based on your situation.
+This directory contains different SQL schema files for setting up the TKR News Gather database. Choose the appropriate file based on your situation.
 
 ## Schema Files Overview
 

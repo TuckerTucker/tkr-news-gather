@@ -1,5 +1,5 @@
 #!/bin/bash
-# Security testing script for TKR News Gatherer
+# Security testing script for TKR News Gather
 # Tests authentication, rate limiting, input validation, and security headers
 
 set -e
@@ -31,7 +31,7 @@ print_warning() {
     echo -e "${YELLOW}[WARN]${NC} $1"
 }
 
-echo "🔒 TKR News Gatherer Security Test Suite"
+echo "🔒 TKR News Gather Security Test Suite"
 echo "========================================"
 echo "API URL: $API_URL"
 echo ""

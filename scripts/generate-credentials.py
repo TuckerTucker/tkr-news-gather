@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate secure credentials for TKR News Gatherer
+Generate secure credentials for TKR News Gather
 Creates JWT secret keys, API keys, and other security tokens
 """
 
@@ -90,7 +90,7 @@ def update_env_file(credentials):
     return env_file
 
 def main():
-    print("🔐 TKR News Gatherer Credential Generator")
+    print("🔐 TKR News Gather Credential Generator")
     print("=========================================")
     print()
     

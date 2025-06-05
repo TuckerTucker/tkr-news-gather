@@ -1,5 +1,5 @@
 """
-Security middleware for TKR News Gatherer
+Security middleware for TKR News Gather
 Implements security headers, error handling, and request logging
 """
 

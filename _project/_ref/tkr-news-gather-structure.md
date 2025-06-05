@@ -1,4 +1,4 @@
-# tkr-news-gather: Python News Gatherer Package
+# tkr-news-gather: Python News Gather Package
 
 ## Project Structure
 
@@ -237,4 +237,4 @@ SCRAPE_TIMEOUT=30
 Would you like me to:
 1. Create the actual implementation code for each module?
 2. Move on to the Supabase schema setup?
-3. Start with a specific component of the news gatherer?
+3. Start with a specific component of the news gather?

@@ -272,7 +272,7 @@ def generate_dependency_report():
 
 def main():
     """Run all dependency tests"""
-    print("🧪 TKR News Gatherer - Dependency Test Suite")
+    print("🧪 TKR News Gather - Dependency Test Suite")
     print("=" * 50)
     
     all_passed = True

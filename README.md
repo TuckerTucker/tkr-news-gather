@@ -1,4 +1,4 @@
-# TKR News Gatherer
+# TKR News Gather
 
 A Python-based news collection and AI processing system for Canadian provincial news with multiple host personalities.
 

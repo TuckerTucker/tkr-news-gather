@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Interactive RunPod Deployment Script for TKR News Gatherer
+Interactive RunPod Deployment Script for TKR News Gather
 Guides users through the complete deployment process step by step.
 """
 
@@ -39,13 +39,14 @@ class RunPodAPI:
     
     def __init__(self, api_key: str):
         self.api_key = api_key
-        self.base_url = "https://api.runpod.ai/graphql"
+        self.graphql_url = "https://api.runpod.io/graphql"  # For templates
+        self.rest_url = "https://rest.runpod.io/v1"  # For endpoints
         self.headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
         
-    def _make_request(self, query: str, variables: Dict = None) -> Dict:
+    def _make_graphql_request(self, query: str, variables: Dict = None) -> Dict:
         """Make GraphQL request to RunPod API"""
         if requests is None:
             raise Exception("requests module not available. Install with: pip install requests")
@@ -55,11 +56,42 @@ class RunPodAPI:
             payload["variables"] = variables
             
         try:
-            response = requests.post(self.base_url, json=payload, headers=self.headers)
+            response = requests.post(self.graphql_url, json=payload, headers=self.headers)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
-            raise Exception(f"RunPod API request failed: {str(e)}")
+            raise Exception(f"RunPod GraphQL request failed: {str(e)}")
+    
+    def _make_rest_request(self, method: str, endpoint: str, data: Dict = None) -> Dict:
+        """Make REST request to RunPod API"""
+        if requests is None:
+            raise Exception("requests module not available. Install with: pip install requests")
+            
+        url = f"{self.rest_url}/{endpoint}"
+        
+        try:
+            response = requests.request(method, url, json=data, headers=self.headers)
+            
+            # Get response data for debugging
+            try:
+                response_data = response.json()
+            except:
+                response_data = {"raw_response": response.text}
+            
+            if response.status_code >= 400:
+                error_msg = f"HTTP {response.status_code}"
+                if isinstance(response_data, dict):
+                    if "error" in response_data:
+                        error_msg = response_data["error"]
+                    elif "message" in response_data:
+                        error_msg = response_data["message"]
+                    elif "errors" in response_data:
+                        error_msg = str(response_data["errors"])
+                raise Exception(f"RunPod REST request failed: {error_msg} (Status: {response.status_code}, Response: {response_data})")
+            
+            return response_data
+        except requests.exceptions.RequestException as e:
+            raise Exception(f"RunPod REST request failed: {str(e)}")
     
     def create_template(self, template_config: Dict) -> str:
         """Create a new template"""
@@ -83,7 +115,7 @@ class RunPodAPI:
         """
         
         variables = {"input": template_config}
-        result = self._make_request(query, variables)
+        result = self._make_graphql_request(query, variables)
         
         if "errors" in result:
             raise Exception(f"Failed to create template: {result['errors']}")
@@ -103,16 +135,17 @@ class RunPodAPI:
                     value
                 }
                 imageName
-                startCmd
+                dockerArgs
                 ports
                 volumeInGb
                 volumeMountPath
+                containerDiskInGb
             }
         }
         """
         
         # First create the template for serverless
-        template_result = self._make_request(query, {"input": endpoint_config})
+        template_result = self._make_graphql_request(query, {"input": endpoint_config})
         
         if "errors" in template_result:
             raise Exception(f"Failed to create serverless template: {template_result['errors']}")
@@ -152,12 +185,41 @@ class RunPodAPI:
             "locations": ["US-CA", "US-OR"]  # Default locations
         }
         
-        endpoint_result = self._make_request(endpoint_query, {"input": endpoint_input})
+        endpoint_result = self._make_graphql_request(endpoint_query, {"input": endpoint_input})
         
         if "errors" in endpoint_result:
             raise Exception(f"Failed to create serverless endpoint: {endpoint_result['errors']}")
             
         return endpoint_result["data"]["createServerlessEndpoint"]
+    
+    def create_serverless_endpoint_rest(self, endpoint_config: Dict) -> Dict:
+        """Create a serverless endpoint using REST API"""
+        try:
+            # Prepare endpoint data for REST API
+            # Note: Even for CPU workloads, RunPod might require GPU types
+            endpoint_data = {
+                "name": endpoint_config["name"],
+                "templateId": endpoint_config["templateId"],
+                "gpuTypeIds": ["NVIDIA RTX A4000"],  # Minimal GPU requirement
+                "computeType": "GPU",  # Required field
+                "workersMin": 0,  # Start with 0 workers
+                "workersMax": endpoint_config.get("maxWorkers", 5),
+                "idleTimeout": endpoint_config.get("idleTimeout", 30),
+                "flashboot": True  # Enable fast startup
+            }
+            
+            result = self._make_rest_request("POST", "endpoints", endpoint_data)
+            
+            # Handle different response formats
+            if isinstance(result, list) and len(result) > 0:
+                return result[0]  # Take first endpoint from list
+            elif isinstance(result, dict):
+                return result
+            else:
+                raise Exception(f"Unexpected response format: {result}")
+                
+        except Exception as e:
+            raise Exception(f"Failed to create serverless endpoint via REST: {str(e)}")
     
     def get_endpoints(self) -> List[Dict]:
         """Get list of serverless endpoints"""
@@ -168,39 +230,26 @@ class RunPodAPI:
                     discountFactor
                     type
                 }
-                serverlessEndpoints {
-                    gpuIds
+                podTemplates {
                     id
-                    idleTimeout
-                    locations {
-                        countryCode
-                        isAvailable
-                    }
-                    maxWorkers
                     name
-                    scalerType
-                    scalerValue
-                    templateId
-                    userId
-                    version
-                    workersMax
-                    workersMin
-                    workersStandby
+                    imageName
+                    isPublic
                 }
             }
         }
         """
         
-        result = self._make_request(query)
+        result = self._make_graphql_request(query)
         
         if "errors" in result:
             raise Exception(f"Failed to get endpoints: {result['errors']}")
             
-        return result["data"]["myself"]["serverlessEndpoints"]
+        return result["data"]["myself"]["podTemplates"]
     
     def get_endpoint_url(self, endpoint_id: str) -> str:
         """Get the URL for an endpoint"""
-        return f"https://api.runpod.ai/v2/{endpoint_id}/runsync"
+        return f"https://api.runpod.io/v2/{endpoint_id}/runsync"
 
 
 class DeploymentScript:
@@ -589,12 +638,12 @@ class DeploymentScript:
         # Endpoint configuration
         endpoint_name = self.ask_input(
             "Enter endpoint name", 
-            existing_endpoint_name or "tkr-news-gatherer"
+            existing_endpoint_name or "tkr-news-gather"
         )
         self.deployment_config['ENDPOINT_NAME'] = endpoint_name
         
         # Resource configuration
-        print(f"\n{Colors.CYAN}Recommended resources for TKR News Gatherer:{Colors.END}")
+        print(f"\n{Colors.CYAN}Recommended resources for TKR News Gather:{Colors.END}")
         print("• Memory: 4GB")
         print("• CPU: 2 vCPUs") 
         print("• GPU: None (CPU only)")
@@ -659,50 +708,82 @@ class DeploymentScript:
                     {"key": "SUPABASE_ANON_KEY", "value": self.deployment_config['SUPABASE_ANON_KEY']}
                 ])
             
-            # Template configuration for serverless
+            print(f"{Colors.CYAN}Creating RunPod template...{Colors.END}")
+            
+            # Create template only (serverless endpoint needs to be created manually)
             template_config = {
                 "name": f"{self.deployment_config['ENDPOINT_NAME']}-template",
                 "imageName": self.deployment_config['DOCKER_IMAGE'],
-                "startCmd": "python runpod_handler.py",
+                "dockerArgs": "python runpod_handler.py",
                 "env": env_vars,
                 "volumeInGb": self.deployment_config['STORAGE_GB'],
                 "volumeMountPath": "/workspace",
+                "containerDiskInGb": 10,  # Container disk space
                 "ports": "8000/http",
                 "isPublic": False
             }
             
-            print(f"{Colors.CYAN}Creating RunPod template...{Colors.END}")
+            # Create the template
+            template_result = runpod_client._make_graphql_request(
+                """
+                mutation saveTemplate($input: SaveTemplateInput!) {
+                    saveTemplate(input: $input) {
+                        id
+                        name
+                        imageName
+                        dockerArgs
+                        env {
+                            key
+                            value
+                        }
+                        volumeInGb
+                        volumeMountPath
+                        containerDiskInGb
+                        ports
+                        isPublic
+                    }
+                }
+                """,
+                {"input": template_config}
+            )
             
-            # Create serverless endpoint (this also creates the template)
+            if "errors" in template_result:
+                raise Exception(f"Failed to create template: {template_result['errors']}")
+            
+            template = template_result["data"]["saveTemplate"]
+            self.deployment_config['TEMPLATE_ID'] = template['id']
+            
+            self.print_success(f"RunPod template created successfully!")
+            print(f"{Colors.GREEN}   Template ID: {template['id']}{Colors.END}")
+            print(f"{Colors.GREEN}   Template Name: {template['name']}{Colors.END}")
+            
+            # Now create the serverless endpoint using REST API
+            print(f"{Colors.CYAN}Creating serverless endpoint...{Colors.END}")
+            
             endpoint_config = {
                 "name": self.deployment_config['ENDPOINT_NAME'],
-                "imageName": self.deployment_config['DOCKER_IMAGE'],
-                "startCmd": "python runpod_handler.py",
-                "env": env_vars,
-                "volumeInGb": self.deployment_config['STORAGE_GB'],
-                "volumeMountPath": "/workspace",
-                "idleTimeout": self.deployment_config['IDLE_TIMEOUT'],
+                "templateId": template['id'],
                 "maxWorkers": self.deployment_config['MAX_WORKERS'],
-                "targetConcurrency": 1
+                "idleTimeout": self.deployment_config['IDLE_TIMEOUT']
             }
             
-            print(f"{Colors.CYAN}Creating RunPod serverless endpoint...{Colors.END}")
-            endpoint_result = runpod_client.create_serverless_endpoint(endpoint_config)
+            endpoint = runpod_client.create_serverless_endpoint_rest(endpoint_config)
             
             # Store endpoint information
-            self.deployment_config['ENDPOINT_ID'] = endpoint_result['id']
-            self.deployment_config['ENDPOINT_URL'] = runpod_client.get_endpoint_url(endpoint_result['id'])
-            self.deployment_config['TEMPLATE_ID'] = endpoint_result['templateId']
+            self.deployment_config['ENDPOINT_ID'] = endpoint['id']
+            self.deployment_config['ENDPOINT_URL'] = runpod_client.get_endpoint_url(endpoint['id'])
             
             self.print_success(f"RunPod endpoint created successfully!")
-            print(f"{Colors.GREEN}   Endpoint ID: {endpoint_result['id']}{Colors.END}")
+            print(f"{Colors.GREEN}   Endpoint ID: {endpoint['id']}{Colors.END}")
             print(f"{Colors.GREEN}   Endpoint URL: {self.deployment_config['ENDPOINT_URL']}{Colors.END}")
+            print(f"{Colors.GREEN}   Max Workers: {endpoint.get('workersMax', 'N/A')}{Colors.END}")
+            print(f"{Colors.GREEN}   Idle Timeout: {endpoint.get('idleTimeout', 'N/A')}s{Colors.END}")
             
             return True
             
         except Exception as e:
-            self.print_error(f"Failed to create RunPod endpoint: {str(e)}")
-            self.print_warning("You can create the endpoint manually using the deployment guide")
+            self.print_error(f"Failed to create RunPod template: {str(e)}")
+            self.print_warning("You can create the template manually using the deployment guide")
             return False
     
     def test_runpod_endpoint(self):
@@ -763,23 +844,32 @@ class DeploymentScript:
         self.print_step("7", "Generating Deployment Instructions")
         
         # Create deployment guide
+        template_info = ""
+        if 'TEMPLATE_ID' in self.deployment_config:
+            template_info = f"""
+## ✅ Template Created Successfully!
+- **Template ID**: `{self.deployment_config['TEMPLATE_ID']}`
+- **Template Name**: `{self.deployment_config['ENDPOINT_NAME']}-template`
+
+Your template is ready! Use it to create a serverless endpoint in the RunPod dashboard.
+"""
+        
         endpoint_info = ""
         if 'ENDPOINT_ID' in self.deployment_config:
             endpoint_info = f"""
 ## ✅ Endpoint Created Successfully!
 - **Endpoint ID**: `{self.deployment_config['ENDPOINT_ID']}`
 - **Endpoint URL**: `{self.deployment_config['ENDPOINT_URL']}`
-- **Template ID**: `{self.deployment_config['TEMPLATE_ID']}`
 
 Your endpoint is ready to use! Skip to the "Testing Your Deployment" section below.
 """
         
-        guide_content = f"""# TKR News Gatherer - RunPod Deployment Guide
+        guide_content = f"""# TKR News Gather - RunPod Deployment Guide
 Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
 ## 🐳 Docker Image
 Your image has been pushed to: `{self.deployment_config['DOCKER_IMAGE']}`
-{endpoint_info}
+{template_info}{endpoint_info}
 ## 🚀 RunPod Endpoint Configuration
 
 ### Basic Settings
@@ -934,16 +1024,30 @@ curl -X POST https://api.runpod.ai/v2/YOUR-ENDPOINT-ID/runsync \\
 
 ## 📋 Manual RunPod Setup Steps
 
+{"### Step 1: Template Already Created ✅" if 'TEMPLATE_ID' in self.deployment_config else "### Step 1: Create Template"}
+{f"Your template `{self.deployment_config['TEMPLATE_ID']}` is ready to use." if 'TEMPLATE_ID' in self.deployment_config else f"""
 1. **Login to RunPod**: Go to https://runpod.io and sign in
-2. **Navigate to Serverless**: Click "Serverless" in the top menu
-3. **Create New Endpoint**: Click "New Endpoint"
-4. **Configure Endpoint**:
-   - Name: `{self.deployment_config['ENDPOINT_NAME']}`
+2. **Navigate to Templates**: Click "Templates" in the sidebar
+3. **Create New Template**: Click "New Template"
+4. **Configure Template**:
+   - Name: `{self.deployment_config['ENDPOINT_NAME']}-template`
    - Container Image: `{self.deployment_config['DOCKER_IMAGE']}`
+   - Container Start Command: `python runpod_handler.py`
    - Environment Variables: Copy from the section above
-   - Resources: Set as specified in Resource Configuration
+   - Volume: {self.deployment_config['STORAGE_GB']}GB
+   - Volume Mount Path: `/workspace`
+5. **Save Template**"""}
+
+### Step 2: Create Serverless Endpoint
+1. **Navigate to Serverless**: Click "Serverless" in the top menu
+2. **Create New Endpoint**: Click "New Endpoint"
+3. **Select Template**: {"Choose your template `" + self.deployment_config['TEMPLATE_ID'] + "`" if 'TEMPLATE_ID' in self.deployment_config else f"Choose the template you created"}
+4. **Configure Scaling**:
+   - Max Workers: {self.deployment_config['MAX_WORKERS']}
+   - Idle Timeout: {self.deployment_config['IDLE_TIMEOUT']} seconds
+   - Execution Timeout: {self.deployment_config['EXECUTION_TIMEOUT']} seconds
 5. **Deploy**: Click "Deploy" and wait for the endpoint to be ready
-6. **Test**: Use the sample requests above to test your deployment
+6. **Copy Endpoint ID**: Save the endpoint ID for testing
 
 ## 🔒 Security Notes
 
@@ -963,7 +1067,7 @@ If your deployment fails:
 ## 📞 Support
 
 - RunPod Documentation: https://docs.runpod.io
-- TKR News Gatherer Issues: Create an issue in the project repository
+- TKR News Gather Issues: Create an issue in the project repository
 """
 
         # Write deployment guide
@@ -1041,6 +1145,9 @@ If your deployment fails:
         print(f"{Colors.GREEN}✅ Security credentials generated{Colors.END}")
         print(f"{Colors.GREEN}✅ Docker image built and pushed{Colors.END}")
         print(f"{Colors.GREEN}✅ RunPod configuration prepared{Colors.END}")
+        
+        if 'TEMPLATE_ID' in self.deployment_config:
+            print(f"{Colors.GREEN}✅ RunPod template created automatically{Colors.END}")
         
         if 'ENDPOINT_ID' in self.deployment_config:
             print(f"{Colors.GREEN}✅ RunPod endpoint created automatically{Colors.END}")
@@ -1123,9 +1230,9 @@ If your deployment fails:
 
     def run(self):
         """Run the complete deployment process"""
-        self.print_header("TKR News Gatherer - RunPod Deployment")
+        self.print_header("TKR News Gather - RunPod Deployment")
         
-        print(f"{Colors.CYAN}This script will guide you through deploying TKR News Gatherer to RunPod.{Colors.END}")
+        print(f"{Colors.CYAN}This script will guide you through deploying TKR News Gather to RunPod.{Colors.END}")
         print(f"{Colors.CYAN}We'll handle Docker builds, credential generation, and configuration.{Colors.END}")
         
         # Show current configuration status
@@ -1160,9 +1267,9 @@ If your deployment fails:
             
             # Ask if user wants automatic RunPod deployment
             if requests is not None:
-                auto_deploy = self.ask_yes_no("Create RunPod endpoint automatically using the API?", True)
+                auto_deploy = self.ask_yes_no("Create RunPod template and endpoint automatically using the API?", True)
             else:
-                self.print_warning("Automatic endpoint creation not available (requests module missing)")
+                self.print_warning("Automatic deployment not available (requests module missing)")
                 auto_deploy = False
             
             if auto_deploy:

@@ -143,7 +143,7 @@ def test_configuration():
 
 async def main():
     """Run all tests"""
-    print("🧪 TKR News Gatherer - Authentication Tests")
+    print("🧪 TKR News Gather - Authentication Tests")
     print("=" * 50)
     
     # Test 1: Configuration

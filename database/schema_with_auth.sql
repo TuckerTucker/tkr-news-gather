@@ -1,4 +1,4 @@
--- Complete Supabase Database Schema for TKR News Gatherer
+-- Complete Supabase Database Schema for TKR News Gather
 -- Includes news functionality + authentication system
 -- Use this for NEW projects, or use auth_migration.sql for existing ones
 

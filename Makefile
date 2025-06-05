@@ -1,11 +1,11 @@
-# Makefile for TKR News Gatherer
+# Makefile for TKR News Gather
 # Updated: 2025-01-04
 
 .PHONY: help install install-dev install-security clean test test-coverage lint format security-scan docker-build docker-run pre-commit setup
 
 # Default target
 help:
-	@echo "TKR News Gatherer Development Commands"
+	@echo "TKR News Gather Development Commands"
 	@echo "======================================"
 	@echo ""
 	@echo "Setup Commands:"

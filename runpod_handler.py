@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-RunPod Serverless Handler for TKR News Gatherer
+RunPod Serverless Handler for TKR News Gather
 
-This handler provides a RunPod-compatible interface for the TKR News Gatherer API.
+This handler provides a RunPod-compatible interface for the TKR News Gather API.
 It supports multiple actions for news fetching, processing, and scraping.
 
 Usage:
@@ -387,7 +387,7 @@ if __name__ == "__main__":
     # Run local tests
     import argparse
     
-    parser = argparse.ArgumentParser(description="TKR News Gatherer RunPod Handler")
+    parser = argparse.ArgumentParser(description="TKR News Gather RunPod Handler")
     parser.add_argument("--test", action="store_true", help="Run local tests")
     parser.add_argument("--action", type=str, help="Action to test")
     parser.add_argument("--province", type=str, help="Province for testing")

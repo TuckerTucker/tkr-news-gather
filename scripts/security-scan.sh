@@ -4,7 +4,7 @@
 
 set -e
 
-echo "🔍 TKR News Gatherer Security Scan"
+echo "🔍 TKR News Gather Security Scan"
 echo "=================================="
 
 # Create reports directory
@@ -154,7 +154,7 @@ generate_summary() {
 # Security Scan Summary
 
 **Scan Date:** $(date)
-**Repository:** TKR News Gatherer
+**Repository:** TKR News Gather
 
 ## Scans Performed
 

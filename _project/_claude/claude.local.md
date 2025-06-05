@@ -22,13 +22,13 @@ Use:
 
 
 # _project.yml 
-# TKR News Gatherer - Core Project Configuration
+# TKR News Gather - Core Project Configuration
 # Python-based news collection and AI processing system for Canadian provincial news
 # Fetches news, scrapes content, and processes with AI host personalities
 
 # Project Metadata - High-level information about the project
 project:
-  name: "TKR News Gatherer"
+  name: "TKR News Gather"
   version: "0.1.0"
   description: "Python news collection and AI processing system for Canadian provincial news with multiple host personalities"
   author: "TKR Team"

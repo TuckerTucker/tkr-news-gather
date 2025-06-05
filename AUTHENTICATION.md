@@ -1,4 +1,4 @@
-# TKR News Gatherer - Authentication System
+# TKR News Gather - Authentication System
 
 This document describes the Supabase-based authentication system implemented to address security vulnerabilities identified in the security audit.
 

@@ -1,5 +1,5 @@
 """
-Supabase Authentication Module for TKR News Gatherer
+Supabase Authentication Module for TKR News Gather
 Implements secure user authentication using Supabase Auth
 """
 
