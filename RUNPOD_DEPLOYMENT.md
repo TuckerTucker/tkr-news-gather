@@ -6,7 +6,7 @@ Your image has been pushed to: `tuckertucker/tkr-news-gather:latest`
 
 ## ✅ Template Created Successfully!
 - **Template ID**: `rxaw4dxqtm`
-- **Template Name**: `tkr-news-gatherer-template`
+- **Template Name**: `tkr-news-gather-template`
 
 Your template is ready! Use it to create a serverless endpoint in the RunPod dashboard.
 
@@ -19,7 +19,7 @@ Your endpoint is ready to use! Skip to the "Testing Your Deployment" section bel
 ## 🚀 RunPod Endpoint Configuration
 
 ### Basic Settings
-- **Name**: `tkr-news-gatherer`
+- **Name**: `tkr-news-gather`
 - **Container Image**: `tuckertucker/tkr-news-gather:latest`
 - **Container Registry**: Docker Hub (public)
 

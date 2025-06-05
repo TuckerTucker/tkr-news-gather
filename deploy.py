@@ -1109,17 +1109,21 @@ If your deployment fails:
             else:
                 updated_lines.append(line)
                 
-        # Add any missing keys
+        # Add any missing keys (including deployment-specific ones)
         updated_lines.append(f"\n# Deployment Configuration - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         for key, value in self.deployment_config.items():
-            if key not in keys_added and key not in ['DOCKER_USERNAME', 'RUNPOD_API_KEY']:
-                updated_lines.append(f"{key}={value}")
+            if key not in keys_added and key not in ['DOCKER_USERNAME', 'DOCKER_PASSWORD']:
+                # Include RUNPOD_API_KEY and ENDPOINT_URL for the client
+                if key in ['RUNPOD_API_KEY', 'ENDPOINT_URL', 'ENDPOINT_ID', 'TEMPLATE_ID']:
+                    updated_lines.append(f"{key}={value}")
+                elif key not in ['RUNPOD_API_KEY']:  # Other deployment keys except sensitive ones
+                    updated_lines.append(f"{key}={value}")
                 
         # Write updated .env
         with open(self.env_file, 'w') as f:
             f.write('\n'.join(updated_lines))
             
-        self.print_success("Environment file updated")
+        self.print_success("Environment file updated with deployment configuration")
         
     def run_local_test(self):
         """Run local test to verify everything works"""
